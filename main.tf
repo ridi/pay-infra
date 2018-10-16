@@ -1,5 +1,3 @@
-variable "terraform_state_bucket" {}
-
 variable "region" {
   default = "ap-northeast-2"
 }
@@ -9,7 +7,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "terraform_state" {
-  bucket = "${var.terraform_state_bucket}"
+  bucket = "ridi-pay-terraform-state"
   versioning {
     enabled = true
   }
