@@ -1,1 +1,1 @@
-stage = "production"
+environment = "production"

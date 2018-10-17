@@ -1,7 +1,4 @@
-variable "stage" {}
-variable "prefix" {
-  default = ""
-}
+variable "environment" {}
 variable "region" {
   default = "ap-northeast-2"
 }

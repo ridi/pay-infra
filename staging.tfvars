@@ -1,2 +1,1 @@
-stage = "staging"
-prefix = "staging-"
+environment = "staging"
