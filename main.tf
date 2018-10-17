@@ -1,7 +1,3 @@
-variable "region" {
-  default = "ap-northeast-2"
-}
-
 terraform {
   backend "s3" {
     bucket         = "ridi-pay-terraform-state"
@@ -32,4 +28,8 @@ resource "aws_dynamodb_table" "terraform_state_lock" {
     name = "LockID"
     type = "S"
   }
+}
+
+resource "aws_s3_bucket" "ridi_pay_frontend_bucket" {
+  bucket = "${var.environment}-ridi-pay-frontend"
 }
