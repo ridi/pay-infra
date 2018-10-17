@@ -31,5 +31,5 @@ resource "aws_dynamodb_table" "terraform_state_lock" {
 }
 
 resource "aws_s3_bucket" "ridi_pay_frontend_bucket" {
-  bucket = "${var.environment}-ridi-pay-frontend"
+  bucket = "ridi-pay-frontend-${var.environment}"
 }
