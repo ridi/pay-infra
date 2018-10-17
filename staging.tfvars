@@ -1,0 +1,2 @@
+stage = "staging"
+prefix = "staging-"
