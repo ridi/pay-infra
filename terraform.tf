@@ -6,3 +6,7 @@ terraform {
     key            = "terraform.tfstate"
   }
 }
+
+provider "aws" {
+  region = "${var.region}"
+}
