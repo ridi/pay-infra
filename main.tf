@@ -19,13 +19,6 @@ resource "aws_cloudfront_distribution" "ridi_pay_frontend" {
     "${local.env == "default" ? "pay.ridibooks.com" : "${local.env}-pay.ridibooks.com"}",
   ]
 
-  custom_error_response {
-    error_caching_min_ttl = 300
-    error_code = 403
-    response_code = 200
-    response_page_path = "/index.html"
-  }
-
   restrictions {
     geo_restriction {
       restriction_type = "none"
@@ -93,19 +86,19 @@ resource "aws_waf_ipset" "ridi_pay_frontend" {
 
   ip_set_descriptors {
     type  = "IPV4"
-    value = "218.232.41.2/24"
+    value = "218.232.41.2/32"
   }
   ip_set_descriptors {
     type  = "IPV4"
-    value = "218.232.41.3/24"
+    value = "218.232.41.3/32"
   }
   ip_set_descriptors {
     type  = "IPV4"
-    value = "218.232.41.4/24"
+    value = "218.232.41.4/32"
   }
   ip_set_descriptors {
     type  = "IPV4"
-    value = "218.232.41.5/24"
+    value = "218.232.41.5/32"
   }
 }
 
