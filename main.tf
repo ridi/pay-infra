@@ -70,6 +70,23 @@ resource "aws_cloudfront_distribution" "ridi_pay_frontend" {
   web_acl_id = "${local.is_staging ? element(concat(aws_waf_web_acl.ridi_pay_frontend.*.id, list("")), 0) : ""}"
 }
 
+data "aws_iam_policy_document" "ridi_pay_frontend" {
+  statement {
+    actions   = ["s3:GetObject"]
+    resources = ["${aws_s3_bucket.ridi_pay_frontend.arn}/*"]
+
+    principals {
+      type        = "AWS"
+      identifiers = ["${aws_cloudfront_origin_access_identity.ridi_pay_frontend.iam_arn}"]
+    }
+  }
+}
+
+resource "aws_s3_bucket_policy" "ridi_pay_frontend" {
+  bucket = "${aws_s3_bucket.ridi_pay_frontend.id}"
+  policy = "${data.aws_iam_policy_document.ridi_pay_frontend.json}"
+}
+
 resource "aws_waf_ipset" "ridi_pay_frontend" {
   name = "RidiPayIPSet"
   count = "${local.is_staging ? 1 : 0}"
