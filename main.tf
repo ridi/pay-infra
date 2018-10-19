@@ -54,7 +54,7 @@ resource "aws_cloudfront_distribution" "ridi_pay_frontend" {
   }
 
   viewer_certificate {
-    cloudfront_default_certificate = true
+    acm_certificate_arn = "arn:aws:acm:us-east-1:023315198496:certificate/27b83967-0c60-4972-b5d6-5c8f490df81b"
     minimum_protocol_version = "TLSv1.1_2016"
     ssl_support_method = "sni-only"
   }
