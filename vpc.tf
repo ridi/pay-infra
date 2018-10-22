@@ -48,3 +48,59 @@ resource "aws_subnet" "private_2c" {
 resource "aws_internet_gateway" "igw" {
   vpc_id = "${aws_vpc.vpc.id}"
 }
+
+resource "aws_default_route_table" "public" {
+  default_route_table_id = "${aws_vpc.vpc.default_route_table_id}"
+  tags {
+    Name = "public"
+  }
+}
+
+resource "aws_route_table" "private" {
+  vpc_id = "${aws_vpc.vpc.id}"
+  tags {
+    Name = "private"
+  }
+}
+
+resource "aws_route_table_association" "public_2a" {
+	subnet_id = "${aws_subnet.public_2a.id}"
+	route_table_id = "${aws_vpc.vpc.default_route_table_id}"
+}
+
+resource "aws_route_table_association" "public_2c" {
+	subnet_id = "${aws_subnet.public_2c.id}"
+	route_table_id = "${aws_vpc.vpc.default_route_table_id}"
+}
+
+resource "aws_route_table_association" "private_2a" {
+	subnet_id = "${aws_subnet.private_2a.id}"
+	route_table_id = "${aws_route_table.private.id}"
+}
+
+resource "aws_route_table_association" "private_2c" {
+	subnet_id = "${aws_subnet.private_2c.id}"
+	route_table_id = "${aws_route_table.private.id}"
+}
+
+resource "aws_route" "public" {
+	route_table_id = "${aws_vpc.vpc.main_route_table_id}"
+	destination_cidr_block = "0.0.0.0/0"
+	gateway_id = "${aws_internet_gateway.igw.id}"
+}
+
+resource "aws_eip" "nat" {
+  vpc = true
+}
+
+resource "aws_nat_gateway" "nat_gateway" {
+  allocation_id = "${aws_eip.nat.id}"
+  subnet_id = "${aws_subnet.public_2a.id}"
+}
+
+resource "aws_route" "private" {
+  route_table_id = "${aws_route_table.private.id}"
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id = "${aws_nat_gateway.nat_gateway.id}"
+}
+
