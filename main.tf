@@ -1,11 +1,9 @@
 locals {
-  env = "${terraform.workspace == "default" ? "prod" : "${terraform.workspace}"}"
-  is_staging = "${local.env == "staging"}"
-  frontend_s3_origin_id = "ridi-pay-origin-${local.env}"
+  frontend_s3_origin_id = "ridi-pay-origin-${module.global_variables.env}"
 }
 
 resource "aws_s3_bucket" "ridi_pay_frontend" {
-  bucket = "ridi-pay-frontend-${local.env}"
+  bucket = "ridi-pay-frontend-${module.global_variables.env}"
 }
 
 resource "aws_cloudfront_origin_access_identity" "ridi_pay_frontend" {}
@@ -16,7 +14,7 @@ resource "aws_cloudfront_distribution" "ridi_pay_frontend" {
   is_ipv6_enabled = true
 
   aliases = [
-    "${local.env == "prod" ? "pay.ridibooks.com" : "${local.env}.pay.ridibooks.com"}",
+    "${module.global_variables.env == "prod" ? "pay.ridibooks.com" : "${module.global_variables.env}.pay.ridibooks.com"}",
   ]
 
   restrictions {
@@ -60,7 +58,7 @@ resource "aws_cloudfront_distribution" "ridi_pay_frontend" {
   }
 
   # Workaround for resource count https://github.com/hashicorp/terraform/issues/16681#issuecomment-345105956
-  web_acl_id = "${local.is_staging ? element(concat(aws_waf_web_acl.ridi_pay_frontend.*.id, list("")), 0) : ""}"
+  web_acl_id = "${module.global_variables.is_staging ? element(concat(aws_waf_web_acl.ridi_pay_frontend.*.id, list("")), 0) : ""}"
 }
 
 data "aws_iam_policy_document" "ridi_pay_frontend" {
@@ -82,7 +80,7 @@ resource "aws_s3_bucket_policy" "ridi_pay_frontend" {
 
 resource "aws_waf_ipset" "ridi_pay_frontend" {
   name = "RidiPayIPSet"
-  count = "${local.is_staging ? 1 : 0}"
+  count = "${module.global_variables.is_staging ? 1 : 0}"
 
   ip_set_descriptors {
     type  = "IPV4"
@@ -106,7 +104,7 @@ resource "aws_waf_rule" "ridi_pay_frontend" {
   depends_on  = ["aws_waf_ipset.ridi_pay_frontend"]
   name        = "RidiPayWAFRule"
   metric_name = "RidiPayWAFRule"
-  count = "${local.is_staging ? 1 : 0}"
+  count = "${module.global_variables.is_staging ? 1 : 0}"
 
   predicates {
     data_id = "${aws_waf_ipset.ridi_pay_frontend.id}"
@@ -119,7 +117,7 @@ resource "aws_waf_web_acl" "ridi_pay_frontend" {
   depends_on  = ["aws_waf_ipset.ridi_pay_frontend", "aws_waf_rule.ridi_pay_frontend"]
   name        = "RidiPayWebACL"
   metric_name = "RidiPayWebACL"
-  count = "${local.is_staging ? 1 : 0}"
+  count = "${module.global_variables.is_staging ? 1 : 0}"
 
   default_action {
     type = "BLOCK"
