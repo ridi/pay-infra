@@ -1,5 +1,5 @@
 resource "aws_ecr_repository" "ridi_pay" {
-  count = "${module.global_variables.is_staging ? 0 : 1}"
+  count = "${module.global_variables.is_prod ? 1 : 0}"
   name = "ridi/pay"
 }
 

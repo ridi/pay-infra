@@ -58,7 +58,7 @@ resource "aws_cloudfront_distribution" "ridi_pay_frontend" {
   }
 
   # Workaround for resource count https://github.com/hashicorp/terraform/issues/16681#issuecomment-345105956
-  web_acl_id = "${module.global_variables.is_staging ? element(concat(aws_waf_web_acl.ridi_pay_frontend.*.id, list("")), 0) : ""}"
+  web_acl_id = "${module.global_variables.is_prod ? "" : element(concat(aws_waf_web_acl.ridi_pay_frontend.*.id, list("")), 0)}"
 }
 
 data "aws_iam_policy_document" "ridi_pay_frontend" {
@@ -80,7 +80,7 @@ resource "aws_s3_bucket_policy" "ridi_pay_frontend" {
 
 resource "aws_waf_ipset" "ridi_pay_frontend" {
   name = "RidiPayIPSet"
-  count = "${module.global_variables.is_staging ? 1 : 0}"
+  count = "${module.global_variables.is_prod ? 0 : 1}"
 
   ip_set_descriptors {
     type  = "IPV4"
@@ -112,7 +112,7 @@ resource "aws_waf_rule" "ridi_pay_frontend" {
   depends_on  = ["aws_waf_ipset.ridi_pay_frontend"]
   name        = "RidiPayWAFRule"
   metric_name = "RidiPayWAFRule"
-  count = "${module.global_variables.is_staging ? 1 : 0}"
+  count = "${module.global_variables.is_prod ? 0 : 1}"
 
   predicates {
     data_id = "${aws_waf_ipset.ridi_pay_frontend.id}"
@@ -125,7 +125,7 @@ resource "aws_waf_web_acl" "ridi_pay_frontend" {
   depends_on  = ["aws_waf_ipset.ridi_pay_frontend", "aws_waf_rule.ridi_pay_frontend"]
   name        = "RidiPayWebACL"
   metric_name = "RidiPayWebACL"
-  count = "${module.global_variables.is_staging ? 1 : 0}"
+  count = "${module.global_variables.is_prod ? 0 : 1}"
 
   default_action {
     type = "BLOCK"
