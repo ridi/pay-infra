@@ -1,14 +1,12 @@
 resource "aws_security_group" "rds" {
   vpc_id = "${aws_vpc.vpc.id}"
   name = "rds"
-  description = "Allow inbound traffic in vpc"
   ingress {
     from_port = 3306
     to_port = 3306
     protocol = "tcp"
     cidr_blocks = [
-      "10.0.0.0/16",
-      "10.10.0.0/16"
+      "${aws_vpc.vpc.cidr_block}"
     ]
   }
   egress {
@@ -16,9 +14,11 @@ resource "aws_security_group" "rds" {
     to_port = 3306
     protocol = "tcp"
     cidr_blocks = [
-      "10.0.0.0/16",
-      "10.10.0.0/16"
+      "${aws_vpc.vpc.cidr_block}"
     ]
+  }
+  tags {
+    Name = "rds-${module.global_variables.env}"
   }
 }
 
@@ -45,6 +45,6 @@ resource "aws_security_group" "bastion" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   tags {
-    Name = "bastion"
+    Name = "bastion-${module.global_variables.env}"
   }
 }

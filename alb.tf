@@ -1,6 +1,7 @@
 resource "aws_alb" "alb" {
   internal = false
   load_balancer_type = "application"
+  name = "ridi-pay-${module.global_variables.env}"
   subnets = [
     "${aws_subnet.public_2a.id}",
     "${aws_subnet.public_2c.id}"

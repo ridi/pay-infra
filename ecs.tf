@@ -1,14 +1,15 @@
-resource "aws_ecr_repository" "ridi_pay_backend" {
-  name = "ridi-pay/backend"
+resource "aws_ecr_repository" "ridi_pay" {
+  count = "${module.global_variables.is_staging ? 0 : 1}"
+  name = "ridi/pay"
 }
 
-resource "aws_ecs_cluster" "ridi_pay_backend" {
-  name = "ridi-pay-backend-${module.global_variables.env}"
+resource "aws_ecs_cluster" "ridi_pay" {
+  name = "ridi-pay-${module.global_variables.env}"
 }
 
 resource "aws_ecs_service" "api" {
   name = "api"
-  cluster = "${aws_ecs_cluster.ridi_pay_backend.id}"
+  cluster = "${aws_ecs_cluster.ridi_pay.id}"
   task_definition = "${aws_ecs_task_definition.api.arn}"
   desired_count = 1
   load_balancer {
@@ -24,7 +25,7 @@ resource "aws_ecs_task_definition" "api" {
 [
   {
     "name": "api",
-    "image": "023315198496.dkr.ecr.ap-northeast-2.amazonaws.com/ridi-pay/backend",
+    "image": "023315198496.dkr.ecr.ap-northeast-2.amazonaws.com/ridi/pay",
     "memory": 256,
     "essential": true,
     "portMappings": [

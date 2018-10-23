@@ -49,19 +49,22 @@ resource "aws_subnet" "private_2c" {
 
 resource "aws_internet_gateway" "igw" {
   vpc_id = "${aws_vpc.vpc.id}"
+  tags {
+    Name = "${module.global_variables.env}"
+  }
 }
 
 resource "aws_default_route_table" "public" {
   default_route_table_id = "${aws_vpc.vpc.default_route_table_id}"
   tags {
-    Name = "public"
+    Name = "${module.global_variables.env}-public"
   }
 }
 
 resource "aws_route_table" "private" {
   vpc_id = "${aws_vpc.vpc.id}"
   tags {
-    Name = "private"
+    Name = "${module.global_variables.env}-private"
   }
 }
 
@@ -98,6 +101,9 @@ resource "aws_eip" "nat" {
 resource "aws_nat_gateway" "nat_gateway" {
   allocation_id = "${aws_eip.nat.id}"
   subnet_id = "${aws_subnet.public_2a.id}"
+  tags {
+    Name = "${module.global_variables.env}"
+  }
 }
 
 resource "aws_route" "private" {

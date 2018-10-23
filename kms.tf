@@ -1,7 +1,7 @@
 resource "aws_kms_key" "rds" {}
 
 resource "aws_kms_alias" "rds" {
-  name = "alias/ridi-pay/rds"
+  name = "alias/ridi-pay/rds-${module.global_variables.env}"
   target_key_id = "${aws_kms_key.rds.key_id}"
 }
 

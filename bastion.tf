@@ -9,11 +9,14 @@ resource "aws_instance" "bastion" {
   subnet_id = "${aws_subnet.public_2a.id}"
   associate_public_ip_address = true
   tags {
-    Name = "bastion"
+    Name = "bastion-${module.global_variables.env}"
   }
 }
 
 resource "aws_eip" "bastion" {
   vpc = true
   instance = "${aws_instance.bastion.id}"
+  tags {
+    Name = "bastion-${module.global_variables.env}"
+  }
 }
