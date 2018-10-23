@@ -12,11 +12,3 @@ resource "aws_instance" "bastion" {
     Name = "bastion-${module.global_variables.env}"
   }
 }
-
-resource "aws_eip" "bastion" {
-  vpc = true
-  instance = "${aws_instance.bastion.id}"
-  tags {
-    Name = "bastion-${module.global_variables.env}"
-  }
-}
