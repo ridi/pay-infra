@@ -14,7 +14,7 @@ resource "aws_cloudfront_distribution" "ridi_pay_frontend" {
   is_ipv6_enabled = true
 
   aliases = [
-    "${module.global_variables.env == "prod" ? "pay.ridibooks.com" : "${module.global_variables.env}.pay.ridibooks.com"}",
+    "${var.frontend_cf_alias[module.global_variables.env]}"
   ]
 
   restrictions {

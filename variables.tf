@@ -49,3 +49,11 @@ variable "private_2c_cidr_blocks" {
     "test" = "10.20.11.0/24"
   }
 }
+
+variable "frontend_cf_alias" {
+  default = {
+    "prod" = "pay.ridibooks.com"
+    "staging" = "staging.pay.ridibooks.com"
+    "test" = "pay.ridi.io"
+  }
+}
