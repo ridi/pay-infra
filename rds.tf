@@ -3,7 +3,7 @@ resource "aws_db_instance" "master" {
   allocated_storage = 16
   storage_type = "gp2"
   engine = "mariadb"
-  engine_version = "10.2.12"
+  engine_version = "10.3.8"
   instance_class = "db.t2.micro"
   name = "ridi_pay"
   username = "ridi"
@@ -16,7 +16,7 @@ resource "aws_db_instance" "master" {
 
 resource "aws_db_parameter_group" "master" {
   name   = "ridi-pay-master-pg"
-  family = "mariadb10.2"
+  family = "mariadb10.3"
   parameter {
     name  = "read_only"
     value = "0"
