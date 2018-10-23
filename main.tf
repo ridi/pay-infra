@@ -98,6 +98,14 @@ resource "aws_waf_ipset" "ridi_pay_frontend" {
     type  = "IPV4"
     value = "218.232.41.5/32"
   }
+  ip_set_descriptors {
+    type  = "IPV4"
+    value = "222.231.4.164/32"
+  }
+  ip_set_descriptors {
+    type  = "IPV4"
+    value = "222.231.4.165/32"
+  }
 }
 
 resource "aws_waf_rule" "ridi_pay_frontend" {
