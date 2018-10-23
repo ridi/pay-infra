@@ -12,6 +12,7 @@ resource "aws_vpc" "vpc" {
 resource "aws_subnet" "public_2a" {
   vpc_id = "${aws_vpc.vpc.id}"
   availability_zone = "ap-northeast-2a"
+  map_public_ip_on_launch = true
   cidr_block = "${module.global_variables.is_staging ? "10.10.0.0/24" : "10.0.0.0/24"}"
   tags {
     Name = "${module.global_variables.env}-public-2a"
@@ -21,6 +22,7 @@ resource "aws_subnet" "public_2a" {
 resource "aws_subnet" "public_2c" {
   vpc_id = "${aws_vpc.vpc.id}"
   availability_zone = "ap-northeast-2c"
+  map_public_ip_on_launch = true
   cidr_block = "${module.global_variables.is_staging ? "10.10.1.0/24" : "10.0.1.0/24"}"
   tags {
     Name = "${module.global_variables.env}-public-2c"
@@ -126,31 +128,31 @@ resource "aws_network_acl" "private" {
   }
 }
 
-resource "aws_network_acl_rule" "public_ingress_80" {
+resource "aws_network_acl_rule" "public_ingress_22" {
   network_acl_id = "${aws_network_acl.public.id}"
   rule_number = 1
   rule_action = "allow"
   egress = false
   protocol = "tcp"
   cidr_block = "218.232.41.2/32"
-  from_port = 80
-  to_port = 80
+  from_port = 22
+  to_port = 22
 }
 
-resource "aws_network_acl_rule" "public_egress_80" {
+resource "aws_network_acl_rule" "public_ingress_80" {
   network_acl_id = "${aws_network_acl.public.id}"
-  rule_number = 1
+  rule_number = 2
   rule_action = "allow"
-  egress = true
+  egress = false
   protocol = "tcp"
-  cidr_block = "0.0.0.0/0"
+  cidr_block = "218.232.41.2/32"
   from_port = 80
   to_port = 80
 }
 
 resource "aws_network_acl_rule" "public_ingress_443" {
   network_acl_id = "${aws_network_acl.public.id}"
-  rule_number = 2
+  rule_number = 3
   rule_action = "allow"
   egress = false
   protocol = "tcp"
@@ -159,15 +161,26 @@ resource "aws_network_acl_rule" "public_ingress_443" {
   to_port = 443
 }
 
-resource "aws_network_acl_rule" "public_egress_443" {
+resource "aws_network_acl_rule" "public_ingress_vpc" {
   network_acl_id = "${aws_network_acl.public.id}"
-  rule_number = 2
+  rule_number = 4
+  rule_action = "allow"
+  egress = false
+  protocol = -1
+  cidr_block = "${aws_vpc.vpc.cidr_block}"
+  from_port = 0
+  to_port = 0
+}
+
+resource "aws_network_acl_rule" "public_egress_all_traffic" {
+  network_acl_id = "${aws_network_acl.public.id}"
+  rule_number = 1
   rule_action = "allow"
   egress = true
-  protocol = "tcp"
+  protocol = -1
   cidr_block = "0.0.0.0/0"
-  from_port = 443
-  to_port = 443
+  from_port = 0
+  to_port = 0
 }
 
 resource "aws_network_acl_rule" "private_ingress_vpc" {
@@ -190,26 +203,4 @@ resource "aws_network_acl_rule" "private_egress_vpc" {
   cidr_block = "${aws_vpc.vpc.cidr_block}"
   from_port = 0
   to_port = 0
-}
-
-resource "aws_network_acl_rule" "private_egress_80" {
-  network_acl_id = "${aws_network_acl.private.id}"
-  rule_number = 2
-  rule_action = "allow"
-  egress = true
-  protocol = "tcp"
-  cidr_block = "0.0.0.0/0"
-  from_port = 80
-  to_port = 80
-}
-
-resource "aws_network_acl_rule" "private_egress_443" {
-  network_acl_id = "${aws_network_acl.private.id}"
-  rule_number = 3
-  rule_action = "allow"
-  egress = true
-  protocol = "tcp"
-  cidr_block = "0.0.0.0/0"
-  from_port = 443
-  to_port = 443
 }
