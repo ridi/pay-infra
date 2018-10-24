@@ -6,7 +6,7 @@ variable "acm_certificate_domain" {
   default = {
     "prod" = "pay.ridibooks.com"
     "staging" = "pay.ridibooks.com"
-    "test" = "pay.ridibooks.com"
+    "test" = "pay.ridi.io"
   }
 }
 
