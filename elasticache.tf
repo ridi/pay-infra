@@ -6,6 +6,9 @@ resource "aws_elasticache_replication_group" "redis" {
   ]
   replication_group_id = "ridi-pay-${module.global_variables.env}"
   replication_group_description = "ridi-pay-${module.global_variables.env}"
+  security_group_ids = [
+    "${aws_vpc.vpc.default_security_group_id}"
+  ]
   node_type = "cache.t2.micro"
   number_cache_clusters = 2
   parameter_group_name = "default.redis4.0"
