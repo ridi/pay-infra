@@ -104,3 +104,49 @@ resource "aws_security_group" "alb_https" {
     Name = "alb_https-${module.global_variables.env}"
   }
 }
+
+resource "aws_security_group" "ssh_from_bastion" {
+  vpc_id = "${aws_vpc.vpc.id}"
+  name = "ssh-from-bastion"
+  ingress {
+    from_port = 22
+    to_port = 22
+    protocol = "tcp"
+    security_groups = [
+      "${aws_security_group.bastion.id}"
+    ]
+  }
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  tags {
+    Name = "ssh-from-bastion-${module.global_variables.env}"
+  }
+}
+
+
+resource "aws_security_group" "store" {
+  vpc_id = "${aws_vpc.vpc.id}"
+  name = "store"
+  ingress {
+    from_port = 443
+    to_port = 443
+    protocol = "tcp"
+    cidr_blocks = [
+      "52.78.93.215/32",
+      "13.209.251.206/32"
+    ]
+  }
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  tags {
+    Name = "store-${module.global_variables.env}"
+  }
+}

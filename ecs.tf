@@ -45,7 +45,11 @@ resource "aws_launch_configuration" "ecs_launch_configuration" {
   image_id = "${data.aws_ami.amazon_ecs_optimized.id}"
   instance_type = "t2.micro"
   iam_instance_profile = "ecsInstanceRole"
-  security_groups = ["${aws_vpc.vpc.default_security_group_id}"]
+  key_name = "bastion"
+  security_groups = [
+    "${aws_vpc.vpc.default_security_group_id}",
+    "${aws_security_group.ssh_from_bastion.id}"
+  ]
   user_data = <<EOF
 #!/bin/bash
 echo ECS_CLUSTER=${aws_ecs_cluster.ridi_pay.name} >> /etc/ecs/ecs.config
