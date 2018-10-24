@@ -17,6 +17,13 @@ resource "aws_cloudfront_distribution" "ridi_pay_frontend" {
     "${var.frontend_cf_alias[module.global_variables.env]}"
   ]
 
+  custom_error_response {
+    error_code = 404
+    response_code = 200
+    error_caching_min_ttl = 0
+    response_page_path = "/index.html"
+  }
+
   restrictions {
     geo_restriction {
       restriction_type = "none"
