@@ -136,8 +136,7 @@ resource "aws_security_group" "store" {
     to_port = 443
     protocol = "tcp"
     cidr_blocks = [
-      "52.78.93.215/32",
-      "13.209.251.206/32"
+      "52.78.20.56/32"
     ]
   }
   egress {
