@@ -25,8 +25,8 @@ resource "aws_alb_target_group" "alb_target_group" {
     "aws_alb.alb"
   ]
   health_check {
-    path = "/me"
-    matcher = "200-499"
+    path = "/health-check"
+    matcher = "200"
   }
 }
 
