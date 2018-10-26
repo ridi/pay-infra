@@ -3,9 +3,7 @@ resource "aws_alb" "alb" {
   load_balancer_type = "application"
   name = "ridi-pay-${module.global_variables.env}"
   security_groups = [
-    "${aws_security_group.alb_http.id}",
-    "${aws_security_group.alb_https.id}",
-    "${aws_security_group.store.id}"
+    "${aws_security_group.web.id}"
   ]
   subnets = [
     "${aws_subnet.public_2a.id}",
