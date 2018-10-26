@@ -26,6 +26,10 @@ resource "aws_alb_target_group" "alb_target_group" {
   depends_on = [
     "aws_alb.alb"
   ]
+  health_check {
+    path = "/me"
+    matcher = "200-499"
+  }
 }
 
 resource "aws_alb_listener" "alb_listener" {
