@@ -3,6 +3,11 @@ resource "aws_ecr_repository" "ridi_pay_backend" {
   name = "ridi/pay-backend"
 }
 
+resource "aws_ecr_repository" "ridi_pay_logger" {
+  count = "${module.global_variables.is_prod ? 1 : 0}"
+  name = "ridi/pay-logger"
+}
+
 resource "aws_ecs_cluster" "ridi_pay_backend" {
   name = "ridi-pay-backend-${module.global_variables.env}"
 }
@@ -20,6 +25,7 @@ resource "aws_launch_configuration" "ridi_pay_backend" {
   user_data = <<EOF
 #!/bin/bash
 echo ECS_CLUSTER=${aws_ecs_cluster.ridi_pay_backend.name} >> /etc/ecs/ecs.config
+echo ECS_AVAILABLE_LOGGING_DRIVERS=[\"json-file\",\"syslog\",\"awslogs\",\"fluentd\",\"none\"] >> /etc/ecs/ecs.config
 EOF
   lifecycle {
     create_before_destroy = true
