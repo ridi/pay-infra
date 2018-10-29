@@ -47,7 +47,7 @@ resource "aws_cloudfront_distribution" "ridi_pay_frontend" {
     max_ttl = 31536000 
     min_ttl = 0
     target_origin_id = "${local.frontend_s3_origin_id}"
-    viewer_protocol_policy = "redirect-to-https"
+    viewer_protocol_policy = "allow-all"
 
     forwarded_values {
       query_string = false
@@ -60,7 +60,7 @@ resource "aws_cloudfront_distribution" "ridi_pay_frontend" {
 
   viewer_certificate {
     acm_certificate_arn = "${data.aws_acm_certificate.cert-us-east-1.arn}"
-    minimum_protocol_version = "TLSv1.1_2016"
+    minimum_protocol_version = "TLSv1"
     ssl_support_method = "sni-only"
   }
 
