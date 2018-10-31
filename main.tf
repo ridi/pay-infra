@@ -47,7 +47,7 @@ resource "aws_cloudfront_distribution" "ridi_pay_frontend" {
     max_ttl = 31536000 
     min_ttl = 0
     target_origin_id = "${local.frontend_s3_origin_id}"
-    viewer_protocol_policy = "allow-all"
+    viewer_protocol_policy = "redirect-to-https"
 
     forwarded_values {
       query_string = false
