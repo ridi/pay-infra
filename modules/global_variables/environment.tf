@@ -1,5 +1,9 @@
+locals {
+  env = "${terraform.workspace == "default" ? "prod" : "${terraform.workspace}"}"
+}
+
 output "env" {
-  value = "${terraform.workspace == "default" ? "prod" : "${terraform.workspace}"}"
+  value = "${local.env}"
 }
 
 output "is_prod" {
@@ -12,4 +16,8 @@ output "is_staging" {
 
 output "is_test" {
   value = "${terraform.workspace == "test"}"
+}
+
+output "frontend_s3_origin_id" {
+  value = "ridi-pay-origin-${local.env}"
 }
