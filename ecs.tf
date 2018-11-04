@@ -53,9 +53,9 @@ EOF
 }
 
 resource "aws_autoscaling_group" "ridi_pay_backend" {
-  max_size = 1
-  min_size = 1
-  desired_capacity = 1
+  max_size = "${module.global_variables.is_prod ? 4 : 1}"
+  min_size = "${module.global_variables.is_prod ? 2 : 1}"
+  desired_capacity = "${module.global_variables.is_prod ? 2 : 1}"
   availability_zones = [
     "ap-northeast-2a",
     "ap-northeast-2c"
@@ -76,9 +76,9 @@ resource "aws_autoscaling_group" "ridi_pay_backend" {
 }
 
 resource "aws_autoscaling_group" "ridi_pay_backend_fluentd" {
-  max_size = 1
-  min_size = 1
-  desired_capacity = 1
+  max_size = "${module.global_variables.is_prod ? 4 : 1}"
+  min_size = "${module.global_variables.is_prod ? 2 : 1}"
+  desired_capacity = "${module.global_variables.is_prod ? 2 : 1}"
   availability_zones = [
     "ap-northeast-2a",
     "ap-northeast-2c"
