@@ -1,4 +1,5 @@
 resource "aws_db_instance" "master" {
+  count = "${module.global_variables.is_staging ? 0 : 1}"
   identifier = "ridi-pay-${module.global_variables.env}-master"
   allocated_storage = 16
   storage_type = "gp2"
@@ -15,6 +16,7 @@ resource "aws_db_instance" "master" {
 }
 
 resource "aws_db_parameter_group" "master" {
+  count = "${module.global_variables.is_staging ? 0 : 1}"
   name   = "ridi-pay-${module.global_variables.env}-master"
   family = "mariadb10.3"
   parameter {
@@ -40,6 +42,7 @@ resource "aws_db_parameter_group" "master" {
 }
 
 resource "aws_db_subnet_group" "rds" {
+  count = "${module.global_variables.is_staging ? 0 : 1}"
   name = "ridi-pay-${module.global_variables.env}"
   subnet_ids = [
     "${aws_subnet.private_2a.id}",

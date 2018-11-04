@@ -1,4 +1,5 @@
 resource "aws_elasticache_replication_group" "redis" {
+  count = "${module.global_variables.is_staging ? 0 : 1}"
   automatic_failover_enabled = false
   availability_zones = [
     "ap-northeast-2a",
@@ -17,6 +18,7 @@ resource "aws_elasticache_replication_group" "redis" {
 }
 
 resource "aws_elasticache_subnet_group" "redis" {
+  count = "${module.global_variables.is_staging ? 0 : 1}"
   name = "ridi-pay-${module.global_variables.env}"
   subnet_ids = [
     "${aws_subnet.private_2a.id}",
