@@ -9,6 +9,7 @@ resource "aws_alb" "ridi_pay_backend" {
     "${aws_subnet.public_2a.id}",
     "${aws_subnet.public_2c.id}"
   ]
+  enable_deletion_protection = true
   lifecycle {
     create_before_destroy = true
   }
@@ -25,6 +26,7 @@ resource "aws_lb" "ridi_pay_backend_fluentd" {
     "${aws_subnet.private_2a.id}",
     "${aws_subnet.private_2c.id}"
   ]
+  enable_deletion_protection = true
   lifecycle {
     create_before_destroy = true
   }
