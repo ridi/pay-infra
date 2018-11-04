@@ -1,6 +1,6 @@
 resource "aws_elasticache_replication_group" "redis" {
   count = "${module.global_variables.is_staging ? 0 : 1}"
-  automatic_failover_enabled = false
+  automatic_failover_enabled = true
   availability_zones = [
     "ap-northeast-2a",
     "ap-northeast-2c"
@@ -10,7 +10,7 @@ resource "aws_elasticache_replication_group" "redis" {
   security_group_ids = [
     "${aws_vpc.vpc.default_security_group_id}"
   ]
-  node_type = "cache.t2.micro"
+  node_type = "${module.global_variables.is_prod ? "cache.m5.large" : "cache.t2.micro"}"
   number_cache_clusters = 2
   parameter_group_name = "default.redis4.0"
   port = 6379

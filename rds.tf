@@ -1,14 +1,15 @@
 resource "aws_db_instance" "master" {
   count = "${module.global_variables.is_staging ? 0 : 1}"
   identifier = "ridi-pay-${module.global_variables.env}-master"
-  allocated_storage = 16
+  allocated_storage = "${module.global_variables.is_prod ? 250 : 16}"
   storage_type = "gp2"
   engine = "mariadb"
   engine_version = "10.3.8"
-  instance_class = "db.t2.micro"
+  instance_class = "${module.global_variables.is_prod ? "db.m5.large" : "db.t2.micro"}"
   name = "ridi_pay"
   username = "ridi"
   password = "${data.aws_kms_secrets.rds.plaintext["password"]}"
+  multi_az = "${module.global_variables.is_prod ? true : false}"
   parameter_group_name = "${aws_db_parameter_group.master.name}"
   db_subnet_group_name = "${aws_db_subnet_group.rds.name}"
   vpc_security_group_ids = ["${aws_security_group.rds.id}"]
