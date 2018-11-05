@@ -55,7 +55,8 @@ resource "aws_cloudfront_distribution" "ridi_pay_frontend" {
   }
 
   # Workaround for resource count https://github.com/hashicorp/terraform/issues/16681#issuecomment-345105956
-  web_acl_id = "${module.global_variables.is_prod ? "" : element(concat(aws_waf_web_acl.ridi_pay_frontend.*.id, list("")), 0)}"
+  # web_acl_id = "${module.global_variables.is_prod ? "" : element(concat(aws_waf_web_acl.ridi_pay_frontend.*.id, list("")), 0)}"
+  web_acl_id = "${aws_waf_web_acl.ridi_pay_frontend.id}"
 }
 
 resource "aws_cloudfront_origin_access_identity" "ridi_pay_frontend" {}
