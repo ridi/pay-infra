@@ -1,6 +1,6 @@
 resource "aws_elasticache_replication_group" "redis" {
   count = "${module.global_variables.is_staging ? 0 : 1}"
-  automatic_failover_enabled = true
+  automatic_failover_enabled = "${module.global_variables.is_prod ? true : false}"
   availability_zones = [
     "ap-northeast-2a",
     "ap-northeast-2c"
