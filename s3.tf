@@ -13,6 +13,7 @@ resource "aws_s3_bucket" "ridi_pay_backend_api_doc" {
 }
 
 resource "aws_s3_bucket_policy" "ridi_pay_backend_api_doc" {
+  count = "${module.global_variables.is_prod ? 1 : 0}"
   bucket = "${aws_s3_bucket.ridi_pay_backend_api_doc.id}"
   policy = <<POLICY
 {
