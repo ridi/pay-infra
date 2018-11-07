@@ -17,7 +17,7 @@ resource "aws_launch_configuration" "ridi_pay_backend" {
   image_id = "${data.aws_ami.amazon_ecs_optimized.id}"
   instance_type = "${module.global_variables.is_prod ? "m5.large" : "t2.micro"}"
   iam_instance_profile = "ecsInstanceRole"
-  key_name = "bastion"
+  key_name = "${var.key_pair["${module.global_variables.env}"]}"
   security_groups = [
     "${aws_vpc.vpc.default_security_group_id}",
     "${aws_security_group.ssh_from_bastion.id}"
@@ -37,7 +37,7 @@ resource "aws_launch_configuration" "ridi_pay_backend_fluentd" {
   image_id = "${data.aws_ami.amazon_ecs_optimized.id}"
   instance_type = "${module.global_variables.is_prod ? "m5.large" : "t2.micro"}"
   iam_instance_profile = "ecsInstanceRole"
-  key_name = "bastion"
+  key_name = "${var.key_pair["${module.global_variables.env}"]}"
   security_groups = [
     "${aws_vpc.vpc.default_security_group_id}",
     "${aws_security_group.ssh_from_bastion.id}"

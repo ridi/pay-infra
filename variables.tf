@@ -50,6 +50,22 @@ variable "private_2c_cidr_blocks" {
   }
 }
 
+variable "key_pair" {
+  default = {
+    "prod" = "prod"
+    "staging" = "staging"
+    "test" = "test"
+  }
+}
+
+variable "bastion_key_pair" {
+  default = {
+    "prod" = "bastion-prod"
+    "staging" = "bastion-staging"
+    "test" = "bastion-test"
+  }
+}
+
 variable "frontend_cf_alias" {
   default = {
     "prod" = "pay.ridibooks.com"
