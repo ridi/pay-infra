@@ -85,22 +85,6 @@ resource "aws_security_group_rule" "allow_https_from_vpc" {
   security_group_id = "${aws_security_group.web.id}"
 }
 
-resource "aws_security_group_rule" "allow_http_from_office" {
-  type = "ingress"
-  from_port = 80
-  to_port = 80
-  protocol = "tcp"
-  cidr_blocks = [
-    "218.232.41.2/32",
-    "218.232.41.3/32",
-    "218.232.41.4/32",
-    "218.232.41.5/32",
-    "222.231.4.164/32",
-    "222.231.4.165/32"
-  ]
-  security_group_id = "${aws_security_group.web.id}"
-}
-
 resource "aws_security_group_rule" "allow_https_from_office" {
   type = "ingress"
   from_port = 443
