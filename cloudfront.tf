@@ -1,3 +1,21 @@
+data "aws_iam_role" "lambda_at_edge" {
+  name = "lambda-at-edge"
+}
+
+resource "aws_lambda_function" "ridi_pay_frontend_lambda" {
+  provider      = "aws.us-east-1"
+  description   = "Blueprint for modifying CloudFront response header implemented in NodeJS."
+  function_name = "ridi-pay-frontend-${module.global_variables.env}"
+  handler       = "index.handler"
+  role          = "${data.aws_iam_role.lambda_at_edge.arn}"
+  runtime       = "nodejs8.10"
+  timeout       = 1
+
+  tags {
+    "lambda-console:blueprint" = "cloudfront-modify-response-header"
+  }
+}
+
 resource "aws_cloudfront_distribution" "ridi_pay_frontend" {
   default_root_object = "index.html"
   enabled = true
@@ -45,6 +63,12 @@ resource "aws_cloudfront_distribution" "ridi_pay_frontend" {
       cookies {
         forward = "none"
       }
+    }
+
+    lambda_function_association {
+      event_type   = "origin-response"
+      lambda_arn   = "${aws_lambda_function.ridi_pay_frontend_lambda.qualified_arn}"
+      include_body = false
     }
   }
 
