@@ -1,5 +1,5 @@
 locals {
-  env = "${terraform.workspace == "default" ? "prod" : "${terraform.workspace}"}"
+  env = "${terraform.workspace}"
 }
 
 output "env" {
@@ -7,7 +7,7 @@ output "env" {
 }
 
 output "is_prod" {
-  value = "${terraform.workspace == "default"}"
+  value = "${terraform.workspace == "prod"}"
 }
 
 output "is_staging" {
