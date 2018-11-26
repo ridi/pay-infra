@@ -72,7 +72,7 @@ resource "aws_cloudwatch_metric_alarm" "backend_api_memory_utilization" {
   namespace = "AWS/ECS"
   period = "300"
   statistic = "Average"
-  threshold = "70"
+  threshold = "80"
   alarm_actions = ["${data.aws_sns_topic.cloudwatch_alarm.arn}"]
   alarm_description = "최근 5분 동안 api service 평균 MemoryUtilization 70% 초과"
   datapoints_to_alarm = 1
