@@ -12,3 +12,10 @@ resource "aws_instance" "bastion" {
     Name = "bastion-${module.global_variables.env}"
   }
 }
+
+resource "aws_eip" "bastion" {
+  count = "${module.global_variables.is_prod ? 1 : 0}"
+  instance = "${aws_instance.bastion.id}"
+  vpc = true
+  depends_on = ["aws_internet_gateway.igw"]
+}
