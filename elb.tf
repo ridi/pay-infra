@@ -39,6 +39,7 @@ resource "aws_alb_target_group" "ridi_pay_backend" {
   port = 80
   protocol = "HTTP"
   vpc_id = "${aws_vpc.vpc.id}"
+  deregistration_delay = 60
   depends_on = [
     "aws_alb.ridi_pay_backend"
   ]
@@ -52,6 +53,7 @@ resource "aws_lb_target_group" "ridi_pay_backend_fluentd" {
   port = 24224
   protocol = "TCP"
   vpc_id = "${aws_vpc.vpc.id}"
+  deregistration_delay = 60
   depends_on = [
     "aws_lb.ridi_pay_backend_fluentd"
   ]
