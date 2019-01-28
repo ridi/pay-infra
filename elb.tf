@@ -63,7 +63,7 @@ resource "aws_alb_listener" "ridi_pay_backend" {
   load_balancer_arn = "${aws_alb.ridi_pay_backend.arn}"
   port = 443
   protocol = "HTTPS"
-  ssl_policy = "ELBSecurityPolicy-FS-2018-06"
+  ssl_policy = "ELBSecurityPolicy-TLS-1-1-2017-01"
   certificate_arn = "${data.aws_acm_certificate.cert.arn}"
   default_action {
     type = "forward"
