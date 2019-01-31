@@ -23,19 +23,7 @@ resource "aws_s3_bucket_policy" "ridi_pay_backend_api_doc" {
             "Effect": "Allow",
             "Principal": "*",
             "Action": "s3:GetObject",
-            "Resource": "arn:aws:s3:::ridi-pay-backend-api-doc/*",
-            "Condition": {
-                "IpAddress": {
-                    "aws:SourceIp": [
-                      "218.232.41.2/32",
-                      "218.232.41.3/32",
-                      "218.232.41.4/32",
-                      "218.232.41.5/32",
-                      "222.231.4.164/32",
-                      "222.231.4.165/32"
-                    ]
-                }
-            }
+            "Resource": "arn:aws:s3:::ridi-pay-backend-api-doc/*"
         }
     ]
 }
