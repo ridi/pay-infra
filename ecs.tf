@@ -15,7 +15,7 @@ resource "aws_ecs_cluster" "ridi_pay_backend" {
 resource "aws_launch_configuration" "ridi_pay_backend" {
   name_prefix = "ridi-pay-backend-ecs-"
   image_id = "${data.aws_ami.amazon_ecs_optimized.id}"
-  instance_type = "${module.global_variables.is_prod ? "m5.large" : "t2.micro"}"
+  instance_type = "${module.global_variables.is_prod ? "t3.medium" : "t3.micro"}"
   iam_instance_profile = "ecsInstanceRole"
   key_name = "${var.key_pair["${module.global_variables.env}"]}"
   security_groups = [
@@ -35,7 +35,7 @@ EOF
 resource "aws_launch_configuration" "ridi_pay_backend_fluentd" {
   name_prefix = "ridi-pay-backend-fluentd-ecs-"
   image_id = "${data.aws_ami.amazon_ecs_optimized.id}"
-  instance_type = "${module.global_variables.is_prod ? "m5.large" : "t2.micro"}"
+  instance_type = "${module.global_variables.is_prod ? "t3.medium" : "t3.micro"}"
   iam_instance_profile = "ecsInstanceRole"
   key_name = "${var.key_pair["${module.global_variables.env}"]}"
   security_groups = [
