@@ -1,5 +1,9 @@
+locals {
+  aws_ami_ubuntu_id = "ami-078e96948945fc2c9"
+}
+
 resource "aws_instance" "bastion" {
-  ami = "${data.aws_ami.ubuntu.id}"
+  ami = "${local.aws_ami_ubuntu_id}"
   availability_zone = "${aws_subnet.public_2a.availability_zone}"
   instance_type = "t3.nano"
   key_name = "${var.bastion_key_pair["${module.global_variables.env}"]}"
