@@ -341,7 +341,15 @@ resource "aws_security_group" "kcp" {
     from_port   = "${var.kcp_fargate_container_port}"
     to_port     = "${var.kcp_fargate_container_port}"
     protocol    = "TCP"
-    cidr_blocks = ["${aws_vpc.vpc.cidr_block}" ]
+    cidr_blocks = [
+      "${aws_vpc.vpc.cidr_block}",
+      "218.232.41.2/32",
+      "218.232.41.3/32",
+      "218.232.41.4/32",
+      "218.232.41.5/32",
+      "222.231.4.164/32",
+      "222.231.4.165/32"
+    ]
   }
   
   egress {
