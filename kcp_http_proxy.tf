@@ -1,8 +1,8 @@
 variable "kcp_certificate_domain" {
   default = {
-    "prod"    = "kcp.ridibooks.com"
+    "prod" = "kcp.ridibooks.com"
     "staging" = "kcp.ridibooks.com"
-    "test"    = "kcp.ridi.io"
+    "test" = "kcp.ridi.io"
   }
 }
 
@@ -52,25 +52,25 @@ variable "ecs_as_cpu_high_threshold_per" {
 
 # ELB
 resource "aws_alb_target_group" "kcp" {
-  name                 = "kcp-http-proxy-albtg-${module.global_variables.env}"
-  port                 = "${var.kcp_fargate_container_port}"
-  protocol             = "HTTP"
-  vpc_id               = "${aws_vpc.vpc.id}"
+  name = "kcp-http-proxy-albtg-${module.global_variables.env}"
+  port = "${var.kcp_fargate_container_port}"
+  protocol = "HTTP"
+  vpc_id = "${aws_vpc.vpc.id}"
   deregistration_delay = 15
-  target_type          = "ip"
+  target_type = "ip"
   
   health_check = {
-    path                = "/"
-    timeout             = 10
-    healthy_threshold   = 2
+    path = "/"
+    timeout = 10
+    healthy_threshold = 2
     unhealthy_threshold = 2
-    interval            = 15
-    matcher             = "200"
+    interval = 15
+    matcher = "200"
   }
 }
 
 resource "aws_alb" "kcp" {
-  name    = "kcp-http-proxy-alb-${module.global_variables.env}"
+  name = "kcp-http-proxy-alb-${module.global_variables.env}"
   subnets = [
     "${aws_subnet.public_2a.id}",
     "${aws_subnet.public_2c.id}"
@@ -86,10 +86,10 @@ data "aws_acm_certificate" "kcp" {
 
 resource "aws_alb_listener" "kcp_ssl" {
   load_balancer_arn = "${aws_alb.kcp.id}"
-  port              = "443"
-  protocol          = "HTTPS"
-  ssl_policy        = "ELBSecurityPolicy-TLS-1-1-2017-01"
-  certificate_arn   = "${data.aws_acm_certificate.kcp.arn}"
+  port = "443"
+  protocol = "HTTPS"
+  ssl_policy = "ELBSecurityPolicy-TLS-1-1-2017-01"
+  certificate_arn = "${data.aws_acm_certificate.kcp.arn}"
   
   default_action {
     target_group_arn = "${aws_alb_target_group.kcp.arn}"
@@ -99,8 +99,8 @@ resource "aws_alb_listener" "kcp_ssl" {
 
 resource "aws_alb_listener" "kcp" {
   load_balancer_arn = "${aws_alb.kcp.id}"
-  port              = "80"
-  protocol          = "HTTP"
+  port = "80"
+  protocol = "HTTP"
   
   default_action {
     target_group_arn = "${aws_alb_target_group.kcp.arn}"
@@ -111,7 +111,7 @@ resource "aws_alb_listener" "kcp" {
 # ECS
 resource "aws_ecr_repository" "kcp" {
   count = "${module.global_variables.is_prod ? 1 : 0}"
-  name  = "ridi/kcp"
+  name = "ridi/kcp"
 }
 
 resource "aws_ecs_cluster" "kcp" {
@@ -119,7 +119,7 @@ resource "aws_ecs_cluster" "kcp" {
 }
 
 resource "aws_iam_role" "kcp_esc_task_execution_role" {
-  name               = "kcp-${module.global_variables.env}-ecs-task-exec-role"
+  name = "kcp-${module.global_variables.env}-ecs-task-exec-role"
   assume_role_policy = "${data.aws_iam_policy_document.kcp_assume_role_policy.json}"
 }
 
@@ -128,25 +128,25 @@ data "aws_iam_policy_document" "kcp_assume_role_policy" {
     actions = ["sts:AssumeRole"]
 
     principals {
-      type        = "Service"
+      type = "Service"
       identifiers = ["ecs-tasks.amazonaws.com"]
     }
   }
 }
 
 resource "aws_iam_role_policy_attachment" "kcp_esc_task_execution_role_policy" {
-  role       = "${aws_iam_role.kcp_esc_task_execution_role.name}"
+  role = "${aws_iam_role.kcp_esc_task_execution_role.name}"
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
 resource "aws_ecs_task_definition" "kcp" {#TODO image node:lts
-    family                   = "kcp"
-    network_mode             = "awsvpc"
+    family = "kcp"
+    network_mode = "awsvpc"
     requires_compatibilities = ["FARGATE"]
-    cpu                      = "${var.kcp_fargate_cpu["${module.global_variables.env}"]}"
-    memory                   = "${var.kcp_fargate_memory["${module.global_variables.env}"]}"
-    execution_role_arn       = "${aws_iam_role.kcp_esc_task_execution_role.arn}"
-    container_definitions    = <<DEFINITION
+    cpu = "${var.kcp_fargate_cpu["${module.global_variables.env}"]}"
+    memory = "${var.kcp_fargate_memory["${module.global_variables.env}"]}"
+    execution_role_arn = "${aws_iam_role.kcp_esc_task_execution_role.arn}"
+    container_definitions = <<DEFINITION
 [
   {   
     "essential": true,
@@ -174,11 +174,11 @@ DEFINITION
 }
 
 resource "aws_ecs_service" "kcp" {
-    name            = "kcp-${module.global_variables.env}"
-    cluster         = "${aws_ecs_cluster.kcp.id}"
+    name = "kcp-${module.global_variables.env}"
+    cluster = "${aws_ecs_cluster.kcp.id}"
     task_definition = "${aws_ecs_task_definition.kcp.arn}"
-    desired_count   = "${module.global_variables.is_prod ? 3 : 1}"
-    launch_type     = "FARGATE"
+    desired_count = "${module.global_variables.is_prod ? 3 : 1}"
+    launch_type = "FARGATE"
 
     network_configuration {
       security_groups = [
@@ -196,8 +196,8 @@ resource "aws_ecs_service" "kcp" {
 
     load_balancer = [{
       target_group_arn = "${aws_alb_target_group.kcp.id}"
-      container_name   = "kcp-http-proxy-${module.global_variables.env}"
-      container_port   = "${var.kcp_fargate_container_port}"
+      container_name = "kcp-http-proxy-${module.global_variables.env}"
+      container_port = "${var.kcp_fargate_container_port}"
     }]
 
     service_registries {
@@ -211,9 +211,9 @@ resource "aws_ecs_service" "kcp" {
 
 # Service Discovery
 resource "aws_service_discovery_private_dns_namespace" "kcp" {
-  name        = "kcp.local"
+  name = "kcp.local"
   description = "kcp"
-  vpc         = "${aws_vpc.vpc.id}"
+  vpc = "${aws_vpc.vpc.id}"
 }
 
 resource "aws_service_discovery_service" "kcp" {
@@ -237,14 +237,14 @@ resource "aws_service_discovery_service" "kcp" {
 
 # Auto Scaling
 resource "aws_cloudwatch_metric_alarm" "kcp_cpu_high" {
-  alarm_name          = "kcp-${module.global_variables.env}-cpu-high-${var.ecs_as_cpu_high_threshold_per}"
+  alarm_name = "kcp-${module.global_variables.env}-cpu-high-${var.ecs_as_cpu_high_threshold_per}"
   comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods  = "1"
-  metric_name         = "CPUUtilization"
-  namespace           = "AWS/ECS"
-  period              = "60"
-  statistic           = "Average"
-  threshold           = "${var.ecs_as_cpu_high_threshold_per}"
+  evaluation_periods = "1"
+  metric_name = "CPUUtilization"
+  namespace = "AWS/ECS"
+  period = "60"
+  statistic = "Average"
+  threshold = "${var.ecs_as_cpu_high_threshold_per}"
 
   dimensions {
     ClusterName = "${aws_ecs_cluster.kcp.name}"
@@ -255,14 +255,14 @@ resource "aws_cloudwatch_metric_alarm" "kcp_cpu_high" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "kcp_cpu_low" {
-  alarm_name          = "kcp-${module.global_variables.env}-cpu-low-${var.ecs_as_cpu_low_threshold_per}"
+  alarm_name = "kcp-${module.global_variables.env}-cpu-low-${var.ecs_as_cpu_low_threshold_per}"
   comparison_operator = "LessThanThreshold"
-  evaluation_periods  = "1"
-  metric_name         = "CPUUtilization"
-  namespace           = "AWS/ECS"
-  period              = "60"
-  statistic           = "Average"
-  threshold           = "${var.ecs_as_cpu_low_threshold_per}"
+  evaluation_periods = "1"
+  metric_name = "CPUUtilization"
+  namespace = "AWS/ECS"
+  period = "60"
+  statistic = "Average"
+  threshold = "${var.ecs_as_cpu_low_threshold_per}"
 
   dimensions {
     ClusterName = "${aws_ecs_cluster.kcp.name}"
@@ -273,22 +273,22 @@ resource "aws_cloudwatch_metric_alarm" "kcp_cpu_low" {
 }
 
 resource "aws_appautoscaling_target" "kcp_scale_target" {
-  service_namespace  = "ecs"
-  resource_id        = "service/${aws_ecs_cluster.kcp.name}/${aws_ecs_service.kcp.name}"
+  service_namespace = "ecs"
+  resource_id = "service/${aws_ecs_cluster.kcp.name}/${aws_ecs_service.kcp.name}"
   scalable_dimension = "ecs:service:DesiredCount"
-  max_capacity       = "${module.global_variables.is_prod ? "3" : "1"}"
-  min_capacity       = "1"
+  max_capacity = "${module.global_variables.is_prod ? "3" : "1"}"
+  min_capacity = "1"
 }
 
 resource "aws_appautoscaling_policy" "kcp_scale_up" {
-  name               = "kcp-scale-up"
-  service_namespace  = "${aws_appautoscaling_target.kcp_scale_target.service_namespace}"
-  resource_id        = "${aws_appautoscaling_target.kcp_scale_target.resource_id}"
+  name = "kcp-scale-up"
+  service_namespace = "${aws_appautoscaling_target.kcp_scale_target.service_namespace}"
+  resource_id = "${aws_appautoscaling_target.kcp_scale_target.resource_id}"
   scalable_dimension = "${aws_appautoscaling_target.kcp_scale_target.scalable_dimension}"
 
   step_scaling_policy_configuration {
-    adjustment_type         = "ChangeInCapacity"
-    cooldown                = 60
+    adjustment_type = "ChangeInCapacity"
+    cooldown = 60
     metric_aggregation_type = "Average"
 
     step_adjustment {
@@ -303,19 +303,19 @@ resource "aws_appautoscaling_policy" "kcp_scale_up" {
 }
 
 resource "aws_appautoscaling_policy" "kcp_scale_down" {
-  name               = "app-scale-down"
-  service_namespace  = "${aws_appautoscaling_target.kcp_scale_target.service_namespace}"
-  resource_id        = "${aws_appautoscaling_target.kcp_scale_target.resource_id}"
+  name = "app-scale-down"
+  service_namespace = "${aws_appautoscaling_target.kcp_scale_target.service_namespace}"
+  resource_id = "${aws_appautoscaling_target.kcp_scale_target.resource_id}"
   scalable_dimension = "${aws_appautoscaling_target.kcp_scale_target.scalable_dimension}"
 
   step_scaling_policy_configuration {
-    adjustment_type         = "ChangeInCapacity"
-    cooldown                = 300
+    adjustment_type = "ChangeInCapacity"
+    cooldown = 300
     metric_aggregation_type = "Average"
 
     step_adjustment {
       metric_interval_upper_bound = 0
-      scaling_adjustment          = -1
+      scaling_adjustment = -1
     }
   }
 
@@ -335,12 +335,12 @@ resource "aws_cloudwatch_log_group" "kcp_logs" {
 # Security Groups
 resource "aws_security_group" "kcp" {
   vpc_id = "${aws_vpc.vpc.id}"
-  name   = "kcp-${module.global_variables.env}-security-group"
+  name = "kcp-${module.global_variables.env}-security-group"
 
   ingress {
-    from_port   = "${var.kcp_fargate_container_port}"
-    to_port     = "${var.kcp_fargate_container_port}"
-    protocol    = "TCP"
+    from_port = "${var.kcp_fargate_container_port}"
+    to_port = "${var.kcp_fargate_container_port}"
+    protocol = "TCP"
     cidr_blocks = [
       "${aws_vpc.vpc.cidr_block}",
       "218.232.41.2/32",
@@ -354,8 +354,8 @@ resource "aws_security_group" "kcp" {
   
   egress {
     from_port = 0
-    to_port   = 0
-    protocol  = "-1"
+    to_port = 0
+    protocol = "-1"
     cidr_blocks = [
       "${aws_vpc.vpc.cidr_block}",
       "218.232.41.2/32",
@@ -374,12 +374,12 @@ resource "aws_security_group" "kcp" {
 
 # DynamoDB
 resource "aws_dynamodb_table" "kcp_approvals" {
-  count          = "${module.global_variables.is_prod ? 1 : 0}"
-  name           = "${var.kcp_dynamodb_table_name}"
-  billing_mode   = "PROVISIONED"
-  read_capacity  = "${module.global_variables.is_prod ? 3 : 1}"
+  count = "${module.global_variables.is_prod ? 1 : 0}"
+  name = "${var.kcp_dynamodb_table_name}"
+  billing_mode = "PROVISIONED"
+  read_capacity = "${module.global_variables.is_prod ? 3 : 1}"
   write_capacity = "${module.global_variables.is_prod ? 3 : 1}"
-  hash_key       = "id"
+  hash_key = "id"
 
   attribute {
     name = "id"
@@ -387,7 +387,7 @@ resource "aws_dynamodb_table" "kcp_approvals" {
   }
 
   tags = {
-    Name       = "${var.kcp_dynamodb_table_name}"
+    Name = "${var.kcp_dynamodb_table_name}"
     Environmet = "${module.global_variables.env}"
   }
 }
