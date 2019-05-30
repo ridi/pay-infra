@@ -78,6 +78,7 @@ resource "aws_alb" "kcp" {
   security_groups = [
     "${aws_security_group.kcp.id}"
   ]
+  internal = true
 }
 
 data "aws_acm_certificate" "kcp" {
@@ -115,7 +116,7 @@ resource "aws_ecr_repository" "kcp" {
 }
 
 resource "aws_ecs_cluster" "kcp" {
-  name = "kcp-ecs-cluster-${module.global_variables.env}"
+  name = "kcp-${module.global_variables.env}"
 }
 
 resource "aws_iam_role" "kcp_esc_task_execution_role" {
@@ -139,7 +140,7 @@ resource "aws_iam_role_policy_attachment" "kcp_esc_task_execution_role_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
-resource "aws_ecs_task_definition" "kcp" {#TODO image node:lts
+resource "aws_ecs_task_definition" "kcp" {#TODO remove
     family = "kcp"
     network_mode = "awsvpc"
     requires_compatibilities = ["FARGATE"]
@@ -173,7 +174,7 @@ resource "aws_ecs_task_definition" "kcp" {#TODO image node:lts
 DEFINITION
 }
 
-resource "aws_ecs_service" "kcp" {
+resource "aws_ecs_service" "kcp" {#TODO remove
     name = "kcp-${module.global_variables.env}"
     cluster = "${aws_ecs_cluster.kcp.id}"
     task_definition = "${aws_ecs_task_definition.kcp.arn}"
