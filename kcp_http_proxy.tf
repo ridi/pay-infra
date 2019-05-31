@@ -17,6 +17,7 @@ variable "ecs_as_cpu_high_threshold_per" {
 # ECS
 resource "aws_ecr_repository" "kcp" {
   name = "ridi/kcp"
+  count = "${module.global_variables.is_test ? 1 : 0}"
 }
 
 resource "aws_ecs_cluster" "kcp" {
@@ -46,13 +47,13 @@ resource "aws_iam_role_policy_attachment" "kcp_esc_task_execution_role_policy" {
 
 # Service Discovery
 resource "aws_service_discovery_private_dns_namespace" "kcp" {
-  name = "kcp.local"
-  description = "kcp"
+  name = "local"
+  description = "kcp-${module.global_variables.env}"
   vpc = "${aws_vpc.vpc.id}"
 }
 
 resource "aws_service_discovery_service" "kcp" {
-  name = "${module.global_variables.env}"
+  name = "${module.global_variables.env}.kcp"
   
   dns_config {
     namespace_id = "${aws_service_discovery_private_dns_namespace.kcp.id}"
@@ -198,6 +199,7 @@ resource "aws_security_group" "kcp" {
 # DynamoDB
 resource "aws_dynamodb_table" "kcp_approvals" {
   name = "${var.kcp_dynamodb_table_name}"
+  count = "${module.global_variables.is_test ? 1 : 0}"
   billing_mode = "PROVISIONED"
   read_capacity = "${module.global_variables.is_prod ? 3 : 1}"
   write_capacity = "${module.global_variables.is_prod ? 3 : 1}"
