@@ -344,7 +344,6 @@ resource "aws_security_group" "kcp" {
 
 # DynamoDB
 resource "aws_dynamodb_table" "kcp_approvals" {
-  count = "${module.global_variables.is_prod ? 1 : 0}"
   name = "${var.kcp_dynamodb_table_name}"
   billing_mode = "PROVISIONED"
   read_capacity = "${module.global_variables.is_prod ? 3 : 1}"
