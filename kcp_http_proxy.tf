@@ -111,7 +111,6 @@ resource "aws_alb_listener" "kcp" {
 
 # ECS
 resource "aws_ecr_repository" "kcp" {
-  count = "${module.global_variables.is_prod ? 1 : 0}"
   name = "ridi/kcp"
 }
 
