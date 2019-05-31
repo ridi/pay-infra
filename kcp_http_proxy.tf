@@ -1,31 +1,3 @@
-variable "kcp_certificate_domain" {
-  default = {
-    "prod" = "kcp.ridibooks.com"
-    "staging" = "kcp.ridibooks.com"
-    "test" = "kcp.ridi.io"
-  }
-}
-
-variable "kcp_fargate_cpu" {
-  description = "Fargate instance CPU units to provision (1 vCPU = 1024 CPU units)"
-  default = {
-    "prod" = 256
-    "test" = 256
-  }
-}
-
-variable "kcp_fargate_memory" {
-  description = "Fargate instance memory to provision (in MiB)"
-  default = {
-    "prod" = 512
-    "test" = 512
-  }
-}
-
-variable "kcp_fargate_host_port" {
-  default = 80  
-}
-
 variable "kcp_fargate_container_port" {
   default = 80
 }
@@ -34,79 +6,12 @@ variable "kcp_dynamodb_table_name" {
   default = "t_payment_approval_requests"
 }
 
-variable "kcp_dynamodb_stage" {
-  description = "KCP DynamoDB Stage"
-  default = {
-    prod = "production"
-    test = "test"
-  }
-}
-
 variable "ecs_as_cpu_low_threshold_per" {
   default = "20"
 }
 
 variable "ecs_as_cpu_high_threshold_per" {
   default = "80"
-}
-
-# ELB
-resource "aws_alb_target_group" "kcp" {
-  name = "kcp-http-proxy-albtg-${module.global_variables.env}"
-  port = "${var.kcp_fargate_container_port}"
-  protocol = "HTTP"
-  vpc_id = "${aws_vpc.vpc.id}"
-  deregistration_delay = 15
-  target_type = "ip"
-  
-  health_check = {
-    path = "/"
-    timeout = 10
-    healthy_threshold = 2
-    unhealthy_threshold = 2
-    interval = 15
-    matcher = "200"
-  }
-}
-
-resource "aws_alb" "kcp" {
-  name = "kcp-http-proxy-alb-${module.global_variables.env}"
-  subnets = [
-    "${aws_subnet.public_2a.id}",
-    "${aws_subnet.public_2c.id}"
-  ]
-  security_groups = [
-    "${aws_security_group.kcp.id}"
-  ]
-  internal = true
-}
-
-data "aws_acm_certificate" "kcp" {
-  domain = "${var.kcp_certificate_domain["${module.global_variables.env}"]}"
-}
-
-resource "aws_alb_listener" "kcp_ssl" {
-  load_balancer_arn = "${aws_alb.kcp.id}"
-  port = "443"
-  protocol = "HTTPS"
-  ssl_policy = "ELBSecurityPolicy-TLS-1-1-2017-01"
-  certificate_arn = "${data.aws_acm_certificate.kcp.arn}"
-  
-  default_action {
-    target_group_arn = "${aws_alb_target_group.kcp.arn}"
-    type = "forward"
-  }
-}
-
-resource "aws_alb_listener" "kcp" {
-  load_balancer_arn = "${aws_alb.kcp.id}"
-  port = "80"
-  protocol = "HTTP"
-  
-  default_action {
-    target_group_arn = "${aws_alb_target_group.kcp.arn}"
-    type = "forward"
-  }
 }
 
 # ECS
@@ -139,70 +44,30 @@ resource "aws_iam_role_policy_attachment" "kcp_esc_task_execution_role_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
-resource "aws_ecs_task_definition" "kcp" {#TODO remove
-    family = "kcp"
-    network_mode = "awsvpc"
-    requires_compatibilities = ["FARGATE"]
-    cpu = "${var.kcp_fargate_cpu["${module.global_variables.env}"]}"
-    memory = "${var.kcp_fargate_memory["${module.global_variables.env}"]}"
-    execution_role_arn = "${aws_iam_role.kcp_esc_task_execution_role.arn}"
-    container_definitions = <<DEFINITION
-[
-  {   
-    "essential": true,
-    "image": "nginx:latest",
-    "name": "kcp-http-proxy-${module.global_variables.env}",
-    "networkMode": "awsvpc",
-    "portMappings": [
-      {
-        "protocol": "tcp",
-        "containerPort": ${var.kcp_fargate_container_port},
-        "hostPort": ${var.kcp_fargate_container_port}
-      }
-    ],
-    "logConfiguration": {
-      "logDriver": "awslogs",
-      "options": {
-        "awslogs-group": "/fargate/service/kcp-${module.global_variables.env}",
-        "awslogs-region": "${var.region}",
-        "awslogs-stream-prefix": "ecs"
-      }
-    }
-  }
-]
-DEFINITION
+# Service Discovery
+resource "aws_service_discovery_private_dns_namespace" "kcp" {
+  name = "kcp.local"
+  description = "kcp"
+  vpc = "${aws_vpc.vpc.id}"
 }
 
-resource "aws_ecs_service" "kcp" {#TODO remove
-    name = "kcp-${module.global_variables.env}"
-    cluster = "${aws_ecs_cluster.kcp.id}"
-    task_definition = "${aws_ecs_task_definition.kcp.arn}"
-    desired_count = "${module.global_variables.is_prod ? 3 : 1}"
-    launch_type = "FARGATE"
+resource "aws_service_discovery_service" "kcp" {
+  name = "${module.global_variables.env}"
+  
+  dns_config {
+    namespace_id = "${aws_service_discovery_private_dns_namespace.kcp.id}"
 
-    network_configuration {
-      security_groups = [
-        "${aws_vpc.vpc.default_security_group_id}",
-        "${aws_security_group.kcp.id}"
-      ]
-      subnets = [
-        "${aws_subnet.private_2a.id}",
-        "${aws_subnet.private_2c.id}",
-        "${aws_subnet.public_2a.id}",
-        "${aws_subnet.public_2c.id}"
-      ]
-      assign_public_ip = true
+    dns_records {
+      ttl = 10
+      type = "A"
     }
 
-    load_balancer = [{
-      target_group_arn = "${aws_alb_target_group.kcp.id}"
-      container_name = "kcp-http-proxy-${module.global_variables.env}"
-      container_port = "${var.kcp_fargate_container_port}"
-    }]
-
-    lifecycle {
-      ignore_changes = ["task_definition"]
-    }
+    routing_policy = "MULTIVALUE"
+  }
+  
+  health_check_custom_config {
+    failure_threshold = 5
+  }
 }
 
 # Auto Scaling
@@ -312,13 +177,7 @@ resource "aws_security_group" "kcp" {
     to_port = "${var.kcp_fargate_container_port}"
     protocol = "TCP"
     cidr_blocks = [
-      "${aws_vpc.vpc.cidr_block}",
-      "218.232.41.2/32",
-      "218.232.41.3/32",
-      "218.232.41.4/32",
-      "218.232.41.5/32",
-      "222.231.4.164/32",
-      "222.231.4.165/32"
+      "${aws_vpc.vpc.cidr_block}"
     ]
   }
   
@@ -327,13 +186,7 @@ resource "aws_security_group" "kcp" {
     to_port = 0
     protocol = "-1"
     cidr_blocks = [
-      "${aws_vpc.vpc.cidr_block}",
-      "218.232.41.2/32",
-      "218.232.41.3/32",
-      "218.232.41.4/32",
-      "218.232.41.5/32",
-      "222.231.4.164/32",
-      "222.231.4.165/32"
+      "${aws_vpc.vpc.cidr_block}"
     ]
   }
 
