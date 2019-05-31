@@ -201,39 +201,9 @@ resource "aws_ecs_service" "kcp" {#TODO remove
       container_port = "${var.kcp_fargate_container_port}"
     }]
 
-    service_registries {
-      registry_arn = "${aws_service_discovery_service.kcp.arn}"
-    }
-
     lifecycle {
       ignore_changes = ["task_definition"]
     }
-}
-
-# Service Discovery
-resource "aws_service_discovery_private_dns_namespace" "kcp" {
-  name = "kcp.local"
-  description = "kcp"
-  vpc = "${aws_vpc.vpc.id}"
-}
-
-resource "aws_service_discovery_service" "kcp" {
-  name = "${module.global_variables.env}"
-  
-  dns_config {
-    namespace_id = "${aws_service_discovery_private_dns_namespace.kcp.id}"
-
-    dns_records {
-      ttl = 10
-      type = "A"
-    }
-
-    routing_policy = "MULTIVALUE"
-  }
-  
-  health_check_custom_config {
-    failure_threshold = 5
-  }
 }
 
 # Auto Scaling
@@ -294,7 +264,7 @@ resource "aws_appautoscaling_policy" "kcp_scale_up" {
 
     step_adjustment {
       metric_interval_lower_bound = 0
-      scaling_adjustment          = 1
+      scaling_adjustment = 1
     }
   }
 
