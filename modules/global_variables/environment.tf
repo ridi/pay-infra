@@ -1,21 +1,21 @@
 locals {
-  env = "${terraform.workspace == "default" ? "prod" : terraform.workspace}"
+  env = terraform.workspace
 }
 
 output "env" {
-  value = "${local.env}"
+  value = local.env
 }
 
 output "is_prod" {
-  value = "${terraform.workspace == "default"}"
+  value = terraform.workspace == "prod"
 }
 
 output "is_staging" {
-  value = "${terraform.workspace == "staging"}"
+  value = terraform.workspace == "staging"
 }
 
 output "is_test" {
-  value = "${terraform.workspace == "test"}"
+  value = terraform.workspace == "test"
 }
 
 output "frontend_s3_origin_id" {

@@ -3,18 +3,18 @@ resource "aws_s3_bucket" "ridi_pay_frontend" {
 }
 
 resource "aws_s3_bucket_policy" "ridi_pay_frontend" {
-  bucket = "${aws_s3_bucket.ridi_pay_frontend.id}"
-  policy = "${data.aws_iam_policy_document.ridi_pay_frontend.json}"
+  bucket = aws_s3_bucket.ridi_pay_frontend.id
+  policy = data.aws_iam_policy_document.ridi_pay_frontend.json
 }
 
 resource "aws_s3_bucket" "ridi_pay_backend_api_doc" {
-  count = "${module.global_variables.is_prod ? 1 : 0}"
+  count  = module.global_variables.is_prod ? 1 : 0
   bucket = "ridi-pay-backend-api-doc"
 }
 
 resource "aws_s3_bucket_policy" "ridi_pay_backend_api_doc" {
-  count = "${module.global_variables.is_prod ? 1 : 0}"
-  bucket = "${aws_s3_bucket.ridi_pay_backend_api_doc.id}"
+  count  = module.global_variables.is_prod ? 1 : 0
+  bucket = aws_s3_bucket.ridi_pay_backend_api_doc[0].id
   policy = <<POLICY
 {
     "Version": "2012-10-17",
@@ -28,4 +28,6 @@ resource "aws_s3_bucket_policy" "ridi_pay_backend_api_doc" {
     ]
 }
 POLICY
+
 }
+
