@@ -1,29 +1,29 @@
-variable "kcp_dynamodb_table_name" {
+variable "kcp_http_proxy_dynamodb_table_name" {
   default = "t_payment_approval_requests"
 }
 
 # ECS
-resource "aws_ecr_repository" "kcp" {
-  name = "ridi/kcp"
+resource "aws_ecr_repository" "kcp_http_proxy" {
+  name = "ridi/kcp-http-proxy"
   count = module.global_variables.is_test ? 1 : 0
 }
 
-resource "aws_ecs_cluster" "kcp" {
-  name = "kcp-${module.global_variables.env}"
+resource "aws_ecs_cluster" "kcp_http_proxy" {
+  name = "kcp-http-proxy-${module.global_variables.env}"
 }
 
 # Service Discovery
-resource "aws_service_discovery_private_dns_namespace" "kcp" {
+resource "aws_service_discovery_private_dns_namespace" "kcp_http_proxy" {
   name = "local"
-  description = "kcp-${module.global_variables.env}"
+  description = "kcp-http-proxy-${module.global_variables.env}"
   vpc = aws_vpc.vpc.id
 }
 
-resource "aws_service_discovery_service" "kcp" {
+resource "aws_service_discovery_service" "kcp_http_proxy" {
   name = "${module.global_variables.env}.kcp"
   
   dns_config {
-    namespace_id = aws_service_discovery_private_dns_namespace.kcp.id
+    namespace_id = aws_service_discovery_private_dns_namespace.kcp_http_proxy.id
 
     dns_records {
       ttl = 10
@@ -39,8 +39,8 @@ resource "aws_service_discovery_service" "kcp" {
 }
 
 # Auto Scaling
-resource "aws_cloudwatch_metric_alarm" "kcp_cpu_high" {
-  alarm_name = "kcp-${module.global_variables.env}-cpu-high-${var.ecs_as_cpu_high_threshold_per}"
+resource "aws_cloudwatch_metric_alarm" "kcp_http_proxy_cpu_high" {
+  alarm_name = "kcp-http-proxy-${module.global_variables.env}-cpu-high"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods = "1"
   metric_name = "CPUUtilization"
@@ -50,15 +50,15 @@ resource "aws_cloudwatch_metric_alarm" "kcp_cpu_high" {
   threshold = 80
 
   dimensions = {
-    ClusterName = aws_ecs_cluster.kcp.name
-    ServiceName = aws_ecs_service.kcp.name
+    ClusterName = aws_ecs_cluster.kcp_http_proxy.name
+    ServiceName = "api"
   }
 
-  alarm_actions = [aws_appautoscaling_policy.kcp_scale_up.arn]
+  alarm_actions = [aws_appautoscaling_policy.kcp_http_proxy_scale_up.arn]
 }
 
-resource "aws_cloudwatch_metric_alarm" "kcp_cpu_low" {
-  alarm_name = "kcp-${module.global_variables.env}-cpu-low-${var.ecs_as_cpu_low_threshold_per}"
+resource "aws_cloudwatch_metric_alarm" "kcp_http_proxy_cpu_low" {
+  alarm_name = "kcp-http-proxy-${module.global_variables.env}-cpu-low"
   comparison_operator = "LessThanThreshold"
   evaluation_periods = "1"
   metric_name = "CPUUtilization"
@@ -68,26 +68,26 @@ resource "aws_cloudwatch_metric_alarm" "kcp_cpu_low" {
   threshold = 20
 
   dimensions = {
-    ClusterName = aws_ecs_cluster.kcp.name
-    ServiceName = aws_ecs_service.kcp.name
+    ClusterName = aws_ecs_cluster.kcp_http_proxy.name
+    ServiceName = "api"
   }
 
-  alarm_actions = [aws_appautoscaling_policy.kcp_scale_down.arn]
+  alarm_actions = [aws_appautoscaling_policy.kcp_http_proxy_scale_down.arn]
 }
 
-resource "aws_appautoscaling_target" "kcp_scale_target" {
+resource "aws_appautoscaling_target" "kcp_http_proxy_scale_target" {
   service_namespace = "ecs"
-  resource_id = "service/${aws_ecs_cluster.kcp.name}/${aws_ecs_service.kcp.name}"
+  resource_id = "service/${aws_ecs_cluster.kcp_http_proxy.name}/api"
   scalable_dimension = "ecs:service:DesiredCount"
   max_capacity = module.global_variables.is_prod ? 3 : 1
   min_capacity = 1
 }
 
-resource "aws_appautoscaling_policy" "kcp_scale_up" {
-  name = "kcp-scale-up"
-  service_namespace = aws_appautoscaling_target.kcp_scale_target.service_namespace
-  resource_id = aws_appautoscaling_target.kcp_scale_target.resource_id
-  scalable_dimension = aws_appautoscaling_target.kcp_scale_target.scalable_dimension
+resource "aws_appautoscaling_policy" "kcp_http_proxy_scale_up" {
+  name = "kcp-http-proxy-scale-up"
+  service_namespace = aws_appautoscaling_target.kcp_http_proxy_scale_target.service_namespace
+  resource_id = aws_appautoscaling_target.kcp_http_proxy_scale_target.resource_id
+  scalable_dimension = aws_appautoscaling_target.kcp_http_proxy_scale_target.scalable_dimension
 
   step_scaling_policy_configuration {
     adjustment_type = "ChangeInCapacity"
@@ -101,15 +101,15 @@ resource "aws_appautoscaling_policy" "kcp_scale_up" {
   }
 
   depends_on = [
-    aws_appautoscaling_target.kcp_scale_target
+    aws_appautoscaling_target.kcp_http_proxy_scale_target
   ]
 }
 
-resource "aws_appautoscaling_policy" "kcp_scale_down" {
-  name = "app-scale-down"
-  service_namespace = aws_appautoscaling_target.kcp_scale_target.service_namespace
-  resource_id = aws_appautoscaling_target.kcp_scale_target.resource_id
-  scalable_dimension = aws_appautoscaling_target.kcp_scale_target.scalable_dimension
+resource "aws_appautoscaling_policy" "kcp_http_proxy_scale_down" {
+  name = "kcp-http-proxy-scale-down"
+  service_namespace = aws_appautoscaling_target.kcp_http_proxy_scale_target.service_namespace
+  resource_id = aws_appautoscaling_target.kcp_http_proxy_scale_target.resource_id
+  scalable_dimension = aws_appautoscaling_target.kcp_http_proxy_scale_target.scalable_dimension
 
   step_scaling_policy_configuration {
     adjustment_type = "ChangeInCapacity"
@@ -123,13 +123,13 @@ resource "aws_appautoscaling_policy" "kcp_scale_down" {
   }
 
   depends_on = [
-    aws_appautoscaling_target.kcp_scale_target
+    aws_appautoscaling_target.kcp_http_proxy_scale_target
   ]
 }
 
 # CloudWatch
-resource "aws_cloudwatch_log_group" "kcp_logs" {
-  name = "/fargate/service/kcp-${module.global_variables.env}"
+resource "aws_cloudwatch_log_group" "kcp_http_proxy_logs" {
+  name = "${module.global_variables.env}.kcp-http-proxy"
   
   tags = {
     Environment = module.global_variables.env
@@ -137,9 +137,9 @@ resource "aws_cloudwatch_log_group" "kcp_logs" {
 }
 
 # Security Groups
-resource "aws_security_group" "kcp" {
+resource "aws_security_group" "kcp_http_proxy" {
   vpc_id = aws_vpc.vpc.id
-  name = "kcp-${module.global_variables.env}-security-group"
+  name = "kcp-http-proxy"
 
   ingress {
     from_port = 80
@@ -160,14 +160,14 @@ resource "aws_security_group" "kcp" {
   }
 
   tags = {
-    Name = "kcp-${module.global_variables.env}"
+    Name = "kcp-http-proxy-${module.global_variables.env}"
   }
 }
 
 # DynamoDB
-resource "aws_dynamodb_table" "kcp_approvals" {
+resource "aws_dynamodb_table" "kcp_payment_approval_requests" {
   count = module.global_variables.is_test ? 1 : 0
-  name = var.kcp_dynamodb_table_name
+  name = var.kcp_http_proxy_dynamodb_table_name
   billing_mode = "PROVISIONED"
   read_capacity = module.global_variables.is_prod ? 3 : 1
   write_capacity = module.global_variables.is_prod ? 3 : 1
@@ -179,7 +179,7 @@ resource "aws_dynamodb_table" "kcp_approvals" {
   }
 
   tags = {
-    Name = var.kcp_dynamodb_table_name
+    Name = var.kcp_http_proxy_dynamodb_table_name
     Environment = module.global_variables.env
   }
 }
