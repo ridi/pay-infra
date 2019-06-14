@@ -5,7 +5,7 @@ variable "kcp_http_proxy_dynamodb_table_name" {
 # ECS
 resource "aws_ecr_repository" "kcp_http_proxy" {
   name = "ridi/kcp-http-proxy"
-  count = module.global_variables.is_test ? 1 : 0
+  count = module.global_variables.is_prod ? 1 : 0
 }
 
 resource "aws_ecs_cluster" "kcp_http_proxy" {
