@@ -1,6 +1,6 @@
 resource "aws_waf_ipset" "ridi_pay_frontend" {
-  name = "RidiPayIPSet"
-  count = "${module.global_variables.is_prod ? 0 : 1}"
+  name  = "RidiPayIPSet"
+  count = module.global_variables.is_prod ? 0 : 1
 
   ip_set_descriptors {
     type  = "IPV4"
@@ -29,23 +29,26 @@ resource "aws_waf_ipset" "ridi_pay_frontend" {
 }
 
 resource "aws_waf_rule" "ridi_pay_frontend" {
-  depends_on  = ["aws_waf_ipset.ridi_pay_frontend"]
+  depends_on  = [aws_waf_ipset.ridi_pay_frontend]
   name        = "RidiPayWAFRule"
   metric_name = "RidiPayWAFRule"
-  count = "${module.global_variables.is_prod ? 0 : 1}"
+  count       = module.global_variables.is_prod ? 0 : 1
 
   predicates {
-    data_id = "${aws_waf_ipset.ridi_pay_frontend.id}"
+    data_id = aws_waf_ipset.ridi_pay_frontend[0].id
     negated = false
     type    = "IPMatch"
   }
 }
 
 resource "aws_waf_web_acl" "ridi_pay_frontend" {
-  depends_on  = ["aws_waf_ipset.ridi_pay_frontend", "aws_waf_rule.ridi_pay_frontend"]
+  depends_on = [
+    aws_waf_ipset.ridi_pay_frontend,
+    aws_waf_rule.ridi_pay_frontend,
+  ]
   name        = "RidiPayWebACL"
   metric_name = "RidiPayWebACL"
-  count = "${module.global_variables.is_prod ? 0 : 1}"
+  count       = module.global_variables.is_prod ? 0 : 1
 
   default_action {
     type = "BLOCK"
@@ -57,7 +60,8 @@ resource "aws_waf_web_acl" "ridi_pay_frontend" {
     }
 
     priority = 1
-    rule_id  = "${aws_waf_rule.ridi_pay_frontend.id}"
+    rule_id  = aws_waf_rule.ridi_pay_frontend[0].id
     type     = "REGULAR"
   }
 }
+
