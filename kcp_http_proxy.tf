@@ -1,17 +1,5 @@
-variable "kcp_fargate_container_port" {
-  default = 80
-}
-
 variable "kcp_dynamodb_table_name" {
   default = "t_payment_approval_requests"
-}
-
-variable "ecs_as_cpu_low_threshold_per" {
-  default = "20"
-}
-
-variable "ecs_as_cpu_high_threshold_per" {
-  default = "80"
 }
 
 # ECS
@@ -80,7 +68,7 @@ resource "aws_cloudwatch_metric_alarm" "kcp_cpu_high" {
   namespace = "AWS/ECS"
   period = "60"
   statistic = "Average"
-  threshold = var.ecs_as_cpu_high_threshold_per
+  threshold = 80
 
   dimensions = {
     ClusterName = aws_ecs_cluster.kcp.name
@@ -98,7 +86,7 @@ resource "aws_cloudwatch_metric_alarm" "kcp_cpu_low" {
   namespace = "AWS/ECS"
   period = "60"
   statistic = "Average"
-  threshold = var.ecs_as_cpu_low_threshold_per
+  threshold = 20
 
   dimensions = {
     ClusterName = aws_ecs_cluster.kcp.name
@@ -175,8 +163,8 @@ resource "aws_security_group" "kcp" {
   name = "kcp-${module.global_variables.env}-security-group"
 
   ingress {
-    from_port = var.kcp_fargate_container_port
-    to_port = var.kcp_fargate_container_port
+    from_port = 80
+    to_port = 80
     protocol = "TCP"
     cidr_blocks = [
       aws_vpc.vpc.cidr_block
