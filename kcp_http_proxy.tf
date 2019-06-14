@@ -1,5 +1,5 @@
 variable "kcp_http_proxy_dynamodb_table_name" {
-  default = "t_payment_approval_requests"
+  default = "kcp-payment-approval-requests"
 }
 
 # ECS
@@ -166,8 +166,7 @@ resource "aws_security_group" "kcp_http_proxy" {
 
 # DynamoDB
 resource "aws_dynamodb_table" "kcp_payment_approval_requests" {
-  count = module.global_variables.is_test ? 1 : 0
-  name = var.kcp_http_proxy_dynamodb_table_name
+  name = "${var.kcp_http_proxy_dynamodb_table_name}-${module.global_variables.env}"
   billing_mode = "PROVISIONED"
   read_capacity = module.global_variables.is_prod ? 3 : 1
   write_capacity = module.global_variables.is_prod ? 3 : 1
