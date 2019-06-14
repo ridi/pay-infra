@@ -12,27 +12,6 @@ resource "aws_ecs_cluster" "kcp" {
   name = "kcp-${module.global_variables.env}"
 }
 
-resource "aws_iam_role" "kcp_esc_task_execution_role" {
-  name = "kcp-${module.global_variables.env}-ecs-task-exec-role"
-  assume_role_policy = data.aws_iam_policy_document.kcp_assume_role_policy.json
-}
-
-data "aws_iam_policy_document" "kcp_assume_role_policy" {
-  statement {
-    actions = ["sts:AssumeRole"]
-
-    principals {
-      type = "Service"
-      identifiers = ["ecs-tasks.amazonaws.com"]
-    }
-  }
-}
-
-resource "aws_iam_role_policy_attachment" "kcp_esc_task_execution_role_policy" {
-  role = aws_iam_role.kcp_esc_task_execution_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-}
-
 # Service Discovery
 resource "aws_service_discovery_private_dns_namespace" "kcp" {
   name = "local"
