@@ -17,7 +17,7 @@ variable "ecs_as_cpu_high_threshold_per" {
 # ECS
 resource "aws_ecr_repository" "kcp" {
   name = "ridi/kcp"
-  count = "${module.global_variables.is_test ? 1 : 0}"
+  count = module.global_variables.is_test ? 1 : 0
 }
 
 resource "aws_ecs_cluster" "kcp" {
@@ -26,7 +26,7 @@ resource "aws_ecs_cluster" "kcp" {
 
 resource "aws_iam_role" "kcp_esc_task_execution_role" {
   name = "kcp-${module.global_variables.env}-ecs-task-exec-role"
-  assume_role_policy = "${data.aws_iam_policy_document.kcp_assume_role_policy.json}"
+  assume_role_policy = data.aws_iam_policy_document.kcp_assume_role_policy.json
 }
 
 data "aws_iam_policy_document" "kcp_assume_role_policy" {
@@ -41,7 +41,7 @@ data "aws_iam_policy_document" "kcp_assume_role_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "kcp_esc_task_execution_role_policy" {
-  role = "${aws_iam_role.kcp_esc_task_execution_role.name}"
+  role = aws_iam_role.kcp_esc_task_execution_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
@@ -49,14 +49,14 @@ resource "aws_iam_role_policy_attachment" "kcp_esc_task_execution_role_policy" {
 resource "aws_service_discovery_private_dns_namespace" "kcp" {
   name = "local"
   description = "kcp-${module.global_variables.env}"
-  vpc = "${aws_vpc.vpc.id}"
+  vpc = aws_vpc.vpc.id
 }
 
 resource "aws_service_discovery_service" "kcp" {
   name = "${module.global_variables.env}.kcp"
   
   dns_config {
-    namespace_id = "${aws_service_discovery_private_dns_namespace.kcp.id}"
+    namespace_id = aws_service_discovery_private_dns_namespace.kcp.id
 
     dns_records {
       ttl = 10
@@ -80,14 +80,14 @@ resource "aws_cloudwatch_metric_alarm" "kcp_cpu_high" {
   namespace = "AWS/ECS"
   period = "60"
   statistic = "Average"
-  threshold = "${var.ecs_as_cpu_high_threshold_per}"
+  threshold = var.ecs_as_cpu_high_threshold_per
 
-  dimensions {
-    ClusterName = "${aws_ecs_cluster.kcp.name}"
-    ServiceName = "${aws_ecs_service.kcp.name}"
+  dimensions = {
+    ClusterName = aws_ecs_cluster.kcp.name
+    ServiceName = aws_ecs_service.kcp.name
   }
 
-  alarm_actions = ["${aws_appautoscaling_policy.kcp_scale_up.arn}"]
+  alarm_actions = [aws_appautoscaling_policy.kcp_scale_up.arn]
 }
 
 resource "aws_cloudwatch_metric_alarm" "kcp_cpu_low" {
@@ -98,29 +98,29 @@ resource "aws_cloudwatch_metric_alarm" "kcp_cpu_low" {
   namespace = "AWS/ECS"
   period = "60"
   statistic = "Average"
-  threshold = "${var.ecs_as_cpu_low_threshold_per}"
+  threshold = var.ecs_as_cpu_low_threshold_per
 
-  dimensions {
-    ClusterName = "${aws_ecs_cluster.kcp.name}"
-    ServiceName = "${aws_ecs_service.kcp.name}"
+  dimensions = {
+    ClusterName = aws_ecs_cluster.kcp.name
+    ServiceName = aws_ecs_service.kcp.name
   }
 
-  alarm_actions = ["${aws_appautoscaling_policy.kcp_scale_down.arn}"]
+  alarm_actions = [aws_appautoscaling_policy.kcp_scale_down.arn]
 }
 
 resource "aws_appautoscaling_target" "kcp_scale_target" {
   service_namespace = "ecs"
   resource_id = "service/${aws_ecs_cluster.kcp.name}/${aws_ecs_service.kcp.name}"
   scalable_dimension = "ecs:service:DesiredCount"
-  max_capacity = "${module.global_variables.is_prod ? "3" : "1"}"
-  min_capacity = "1"
+  max_capacity = module.global_variables.is_prod ? 3 : 1
+  min_capacity = 1
 }
 
 resource "aws_appautoscaling_policy" "kcp_scale_up" {
   name = "kcp-scale-up"
-  service_namespace = "${aws_appautoscaling_target.kcp_scale_target.service_namespace}"
-  resource_id = "${aws_appautoscaling_target.kcp_scale_target.resource_id}"
-  scalable_dimension = "${aws_appautoscaling_target.kcp_scale_target.scalable_dimension}"
+  service_namespace = aws_appautoscaling_target.kcp_scale_target.service_namespace
+  resource_id = aws_appautoscaling_target.kcp_scale_target.resource_id
+  scalable_dimension = aws_appautoscaling_target.kcp_scale_target.scalable_dimension
 
   step_scaling_policy_configuration {
     adjustment_type = "ChangeInCapacity"
@@ -134,15 +134,15 @@ resource "aws_appautoscaling_policy" "kcp_scale_up" {
   }
 
   depends_on = [
-    "aws_appautoscaling_target.kcp_scale_target"
+    aws_appautoscaling_target.kcp_scale_target
   ]
 }
 
 resource "aws_appautoscaling_policy" "kcp_scale_down" {
   name = "app-scale-down"
-  service_namespace = "${aws_appautoscaling_target.kcp_scale_target.service_namespace}"
-  resource_id = "${aws_appautoscaling_target.kcp_scale_target.resource_id}"
-  scalable_dimension = "${aws_appautoscaling_target.kcp_scale_target.scalable_dimension}"
+  service_namespace = aws_appautoscaling_target.kcp_scale_target.service_namespace
+  resource_id = aws_appautoscaling_target.kcp_scale_target.resource_id
+  scalable_dimension = aws_appautoscaling_target.kcp_scale_target.scalable_dimension
 
   step_scaling_policy_configuration {
     adjustment_type = "ChangeInCapacity"
@@ -156,29 +156,30 @@ resource "aws_appautoscaling_policy" "kcp_scale_down" {
   }
 
   depends_on = [
-    "aws_appautoscaling_target.kcp_scale_target"
+    aws_appautoscaling_target.kcp_scale_target
   ]
 }
 
 # CloudWatch
 resource "aws_cloudwatch_log_group" "kcp_logs" {
   name = "/fargate/service/kcp-${module.global_variables.env}"
-  tags {
-    Environment = "${module.global_variables.env}"
+  
+  tags = {
+    Environment = module.global_variables.env
   }
 }
 
 # Security Groups
 resource "aws_security_group" "kcp" {
-  vpc_id = "${aws_vpc.vpc.id}"
+  vpc_id = aws_vpc.vpc.id
   name = "kcp-${module.global_variables.env}-security-group"
 
   ingress {
-    from_port = "${var.kcp_fargate_container_port}"
-    to_port = "${var.kcp_fargate_container_port}"
+    from_port = var.kcp_fargate_container_port
+    to_port = var.kcp_fargate_container_port
     protocol = "TCP"
     cidr_blocks = [
-      "${aws_vpc.vpc.cidr_block}"
+      aws_vpc.vpc.cidr_block
     ]
   }
   
@@ -187,22 +188,22 @@ resource "aws_security_group" "kcp" {
     to_port = 0
     protocol = "-1"
     cidr_blocks = [
-      "${aws_vpc.vpc.cidr_block}"
+      aws_vpc.vpc.cidr_block
     ]
   }
 
-  tags {
+  tags = {
     Name = "kcp-${module.global_variables.env}"
   }
 }
 
 # DynamoDB
 resource "aws_dynamodb_table" "kcp_approvals" {
-  name = "${var.kcp_dynamodb_table_name}"
-  count = "${module.global_variables.is_test ? 1 : 0}"
+  count = module.global_variables.is_test ? 1 : 0
+  name = var.kcp_dynamodb_table_name
   billing_mode = "PROVISIONED"
-  read_capacity = "${module.global_variables.is_prod ? 3 : 1}"
-  write_capacity = "${module.global_variables.is_prod ? 3 : 1}"
+  read_capacity = module.global_variables.is_prod ? 3 : 1
+  write_capacity = module.global_variables.is_prod ? 3 : 1
   hash_key = "id"
 
   attribute {
@@ -211,7 +212,7 @@ resource "aws_dynamodb_table" "kcp_approvals" {
   }
 
   tags = {
-    Name = "${var.kcp_dynamodb_table_name}"
-    Environmet = "${module.global_variables.env}"
+    Name = var.kcp_dynamodb_table_name
+    Environment = module.global_variables.env
   }
 }
