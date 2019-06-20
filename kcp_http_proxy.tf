@@ -51,7 +51,7 @@ resource "aws_cloudwatch_metric_alarm" "kcp_http_proxy_cpu_high" {
 
   dimensions = {
     ClusterName = aws_ecs_cluster.kcp_http_proxy.name
-    ServiceName = "api"
+    ServiceName = "kcp-http-proxy"
   }
 
   alarm_actions = [aws_appautoscaling_policy.kcp_http_proxy_scale_up.arn]
@@ -69,7 +69,7 @@ resource "aws_cloudwatch_metric_alarm" "kcp_http_proxy_cpu_low" {
 
   dimensions = {
     ClusterName = aws_ecs_cluster.kcp_http_proxy.name
-    ServiceName = "api"
+    ServiceName = "kcp-http-proxy"
   }
 
   alarm_actions = [aws_appautoscaling_policy.kcp_http_proxy_scale_down.arn]
@@ -77,7 +77,7 @@ resource "aws_cloudwatch_metric_alarm" "kcp_http_proxy_cpu_low" {
 
 resource "aws_appautoscaling_target" "kcp_http_proxy_scale_target" {
   service_namespace = "ecs"
-  resource_id = "service/${aws_ecs_cluster.kcp_http_proxy.name}/api"
+  resource_id = "service/${aws_ecs_cluster.kcp_http_proxy.name}/kcp-http-proxy"
   scalable_dimension = "ecs:service:DesiredCount"
   max_capacity = module.global_variables.is_prod ? 3 : 1
   min_capacity = 1
