@@ -13,9 +13,9 @@ resource "aws_ecs_cluster" "kcp_http_proxy" {
 }
 
 # Service Discovery
-resource "aws_service_discovery_private_dns_namespace" "kcp_http_proxy" {
-  name = "local"
-  description = "kcp-http-proxy-${module.global_variables.env}"
+resource "aws_service_discovery_private_dns_namespace" "sd_private_dns_namespace" {
+  name = "${module.global_variables.env}.local"
+  description = "${module.global_variables.env}"
   vpc = aws_vpc.vpc.id
 }
 
