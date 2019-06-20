@@ -20,10 +20,10 @@ resource "aws_service_discovery_private_dns_namespace" "sd_private_dns_namespace
 }
 
 resource "aws_service_discovery_service" "kcp_http_proxy" {
-  name = "${module.global_variables.env}.kcp"
+  name = "kcp"
   
   dns_config {
-    namespace_id = aws_service_discovery_private_dns_namespace.kcp_http_proxy.id
+    namespace_id = aws_service_discovery_private_dns_namespace.sd_private_dns_namespace.id
 
     dns_records {
       ttl = 10
