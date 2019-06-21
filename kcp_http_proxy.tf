@@ -40,6 +40,7 @@ resource "aws_service_discovery_service" "kcp_http_proxy" {
 
 # Auto Scaling
 resource "aws_cloudwatch_metric_alarm" "kcp_http_proxy_cpu_high" {
+  count = module.global_variables.is_prod ? 1 : 0
   alarm_name = "kcp-http-proxy-${module.global_variables.env}-cpu-high"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods = "1"
@@ -58,6 +59,7 @@ resource "aws_cloudwatch_metric_alarm" "kcp_http_proxy_cpu_high" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "kcp_http_proxy_cpu_low" {
+  count = module.global_variables.is_prod ? 1 : 0
   alarm_name = "kcp-http-proxy-${module.global_variables.env}-cpu-low"
   comparison_operator = "LessThanThreshold"
   evaluation_periods = "1"
