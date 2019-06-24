@@ -1,4 +1,8 @@
-variable "kcp_http_proxy_dynamodb_table_name" {
+variable "dynamodb_table_name_kcp_payment_approval_request_locks" {
+  default = "kcp-payment-approval-request-locks"
+}
+
+variable "dynamodb_table_name_kcp_payment_approval_requests" {
   default = "kcp-payment-approval-requests"
 }
 
@@ -166,8 +170,8 @@ resource "aws_security_group" "kcp_http_proxy" {
 }
 
 # DynamoDB
-resource "aws_dynamodb_table" "kcp_payment_approval_requests" {
-  name = "${var.kcp_http_proxy_dynamodb_table_name}-${module.global_variables.env}"
+resource "aws_dynamodb_table" "kcp_payment_approval_request_locks" {
+  name = "${var.dynamodb_table_name_kcp_payment_approval_request_locks}-${module.global_variables.env}"
   billing_mode = "PROVISIONED"
   read_capacity = module.global_variables.is_prod ? 3 : 1
   write_capacity = module.global_variables.is_prod ? 3 : 1
@@ -179,7 +183,25 @@ resource "aws_dynamodb_table" "kcp_payment_approval_requests" {
   }
 
   tags = {
-    Name = var.kcp_http_proxy_dynamodb_table_name
+    Name = var.dynamodb_table_name_kcp_payment_approval_request_locks
+    Environment = module.global_variables.env
+  }
+}
+
+resource "aws_dynamodb_table" "kcp_payment_approval_requests" {
+  name = "${var.dynamodb_table_name_kcp_payment_approval_requests}-${module.global_variables.env}"
+  billing_mode = "PROVISIONED"
+  read_capacity = module.global_variables.is_prod ? 3 : 1
+  write_capacity = module.global_variables.is_prod ? 3 : 1
+  hash_key = "id"
+
+  attribute {
+    name = "id"
+    type = "S"
+  }
+
+  tags = {
+    Name = var.dynamodb_table_name_kcp_payment_approval_requests
     Environment = module.global_variables.env
   }
 }
