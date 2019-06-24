@@ -182,6 +182,11 @@ resource "aws_dynamodb_table" "kcp_payment_approval_request_locks" {
     type = "S"
   }
 
+  ttl {
+    attribute_name = "ttl"
+    enabled = true
+  }
+
   tags = {
     Name = var.dynamodb_table_name_kcp_payment_approval_request_locks
     Environment = module.global_variables.env
