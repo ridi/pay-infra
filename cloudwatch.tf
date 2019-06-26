@@ -82,44 +82,6 @@ resource "aws_cloudwatch_metric_alarm" "backend_api_memory_utilization" {
   }
 }
 
-resource "aws_cloudwatch_metric_alarm" "backend_fluentd_cpu_utilization" {
-  count               = module.global_variables.is_prod ? 1 : 0
-  alarm_name          = "backend-fluentd-cpu-utilization"
-  comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods  = "1"
-  metric_name         = "CpuUtilization"
-  namespace           = "AWS/ECS"
-  period              = "300"
-  statistic           = "Average"
-  threshold           = "70"
-  alarm_actions       = [data.aws_sns_topic.cloudwatch_alarm.arn]
-  alarm_description   = "최근 5분 동안 fluentd service 평균 CpuUtilization 70% 초과"
-  datapoints_to_alarm = 1
-  dimensions = {
-    ClusterName = aws_ecs_cluster.ridi_pay_backend.name
-    ServiceName = "fluentd"
-  }
-}
-
-resource "aws_cloudwatch_metric_alarm" "backend_fluentd_memory_utilization" {
-  count               = module.global_variables.is_prod ? 1 : 0
-  alarm_name          = "backend-fluentd-memory-utilization"
-  comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods  = "1"
-  metric_name         = "MemoryUtilization"
-  namespace           = "AWS/ECS"
-  period              = "300"
-  statistic           = "Average"
-  threshold           = "70"
-  alarm_actions       = [data.aws_sns_topic.cloudwatch_alarm.arn]
-  alarm_description   = "최근 5분 동안 fluentd service 평균 MemoryUtilization 70% 초과"
-  datapoints_to_alarm = 1
-  dimensions = {
-    ClusterName = aws_ecs_cluster.ridi_pay_backend.name
-    ServiceName = "fluentd"
-  }
-}
-
 resource "aws_cloudwatch_metric_alarm" "elasticache_001_cpu_utilization" {
   count               = module.global_variables.is_prod ? 1 : 0
   alarm_name          = "elasticache-001-cpu-utilization"
