@@ -167,9 +167,7 @@ resource "aws_security_group" "kcp_http_proxy" {
 
 resource "aws_dynamodb_table" "kcp_payment_approval_requests" {
   name = "${var.dynamodb_table_name_kcp_payment_approval_requests}-${module.global_variables.env}"
-  billing_mode = "PROVISIONED"
-  read_capacity = module.global_variables.is_prod ? 3 : 1
-  write_capacity = module.global_variables.is_prod ? 3 : 1
+  billing_mode = "PAY_PER_REQUEST"
   hash_key = "id"
 
   attribute {
