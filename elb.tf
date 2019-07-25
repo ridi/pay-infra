@@ -30,6 +30,19 @@ resource "aws_alb_target_group" "ridi_pay_backend" {
   }
 }
 
+resource "aws_alb_target_group" "ridi_pay_backend_fargate" {
+  port = 80
+  protocol = "HTTP"
+  target_type = "ip"
+  vpc_id = aws_vpc.vpc.id
+  deregistration_delay = 60
+  depends_on = [aws_alb.ridi_pay_backend]
+  health_check {
+    path    = "/health-check"
+    matcher = "200"
+  }
+}
+
 resource "aws_alb_listener" "ridi_pay_backend" {
   load_balancer_arn = aws_alb.ridi_pay_backend.arn
   port              = 443
@@ -41,4 +54,3 @@ resource "aws_alb_listener" "ridi_pay_backend" {
     target_group_arn = aws_alb_target_group.ridi_pay_backend.arn
   }
 }
-
