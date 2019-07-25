@@ -1,3 +1,29 @@
+resource "aws_security_group" "fargate" {
+  vpc_id = aws_vpc.vpc.id
+  name = "fargate"
+
+  ingress {
+    from_port = 80
+    to_port = 80
+    protocol = "TCP"
+    cidr_blocks = [
+      aws_vpc.vpc.cidr_block
+    ]
+  }
+  
+  # If the cidr block isn't same with '0.0.0.0/0', starting ecs tasks may be failed because it can't be able to fetch container images from aws ecr.
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "fargate-${module.global_variables.env}"
+  }
+}
+
 resource "aws_security_group" "rds" {
   vpc_id = aws_vpc.vpc.id
   name   = "rds"
