@@ -22,6 +22,14 @@ resource "aws_cloudwatch_log_group" "backend_api_pg_kcp" {
   }
 }
 
+resource "aws_cloudwatch_log_group" "backend" {
+  name = "${module.global_variables.env}.ridi-pay-backend"
+  
+  tags = {
+    Environment = module.global_variables.env
+  }
+}
+
 data "aws_sns_topic" "cloudwatch_alarm" {
   name = "cloudwatch-alarm"
 }
