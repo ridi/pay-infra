@@ -136,3 +136,16 @@ resource "aws_route" "private" {
   nat_gateway_id         = aws_nat_gateway.nat_gateway.id
 }
 
+resource "aws_vpc_endpoint" "ecr" {
+  vpc_id = aws_vpc.vpc.id
+  service_name = "com.amazonaws.ap-northeast-2.ecr.dkr"
+  vpc_endpoint_type = "Interface"
+  private_dns_enabled = true
+  subnet_ids = [
+    aws_subnet.private_2a.id,
+    aws_subnet.private_2c.id
+  ]
+  security_group_ids = [
+    aws_security_group.ecr_vpc_endpoint.id
+  ]
+}

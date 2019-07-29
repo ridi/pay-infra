@@ -55,13 +55,12 @@ resource "aws_security_group" "kcp_http_proxy" {
   ingress {
     from_port = 80
     to_port = 80
-    protocol = "TCP"
+    protocol = "tcp"
     cidr_blocks = [
       aws_vpc.vpc.cidr_block
     ]
   }
   
-  # If the cidr block isn't same with '0.0.0.0/0', starting ecs tasks may be failed because it can't be able to fetch container images from aws ecr.
   egress {
     from_port = 0
     to_port = 0
