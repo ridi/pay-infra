@@ -34,9 +34,9 @@ data "aws_sns_topic" "cloudwatch_alarm" {
   name = "cloudwatch-alarm"
 }
 
-resource "aws_cloudwatch_metric_alarm" "backend_api_alb_5xx_error" {
+resource "aws_cloudwatch_metric_alarm" "pay_backend_alb_5xx_error" {
   count               = module.global_variables.is_prod ? 1 : 0
-  alarm_name          = "backend_api_alb_5xx_error"
+  alarm_name          = "pay_backend_alb_5xx_error"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = "1"
   metric_name         = "HTTPCode_ELB_5XX_Count"
@@ -45,16 +45,16 @@ resource "aws_cloudwatch_metric_alarm" "backend_api_alb_5xx_error" {
   statistic           = "Sum"
   threshold           = "10"
   alarm_actions       = [data.aws_sns_topic.cloudwatch_alarm.arn]
-  alarm_description   = "최근 5분 동안 API ALB 5xx Error(Target 5xx 에러 제외) 10건 이상 발생"
+  alarm_description   = "최근 5분 동안 ALB 5xx Error(Target 5xx 에러 제외) 10건 이상 발생"
   datapoints_to_alarm = 1
   dimensions = {
-    LoadBalancer = aws_alb.ridi_pay_backend.arn_suffix
+    LoadBalancer = aws_alb.ridi_pay_backend_fargate.arn_suffix
   }
 }
 
-resource "aws_cloudwatch_metric_alarm" "backend_api_cpu_utilization" {
+resource "aws_cloudwatch_metric_alarm" "pay_backend_cpu_utilization" {
   count               = module.global_variables.is_prod ? 1 : 0
-  alarm_name          = "backend-api-cpu-utilization"
+  alarm_name          = "pay-backend-cpu-utilization"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = "1"
   metric_name         = "CpuUtilization"
@@ -63,17 +63,17 @@ resource "aws_cloudwatch_metric_alarm" "backend_api_cpu_utilization" {
   statistic           = "Average"
   threshold           = "70"
   alarm_actions       = [data.aws_sns_topic.cloudwatch_alarm.arn]
-  alarm_description   = "최근 5분 동안 api service 평균 CpuUtilization 70% 초과"
+  alarm_description   = "최근 5분 동안 pay-backend service 평균 CpuUtilization 70% 초과"
   datapoints_to_alarm = 1
   dimensions = {
     ClusterName = aws_ecs_cluster.ridi_pay_backend.name
-    ServiceName = "api"
+    ServiceName = "pay-backend"
   }
 }
 
-resource "aws_cloudwatch_metric_alarm" "backend_api_memory_utilization" {
+resource "aws_cloudwatch_metric_alarm" "pay_backend_memory_utilization" {
   count               = module.global_variables.is_prod ? 1 : 0
-  alarm_name          = "backend-api-memory-utilization"
+  alarm_name          = "pay-backend-memory-utilization"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = "1"
   metric_name         = "MemoryUtilization"
@@ -82,11 +82,11 @@ resource "aws_cloudwatch_metric_alarm" "backend_api_memory_utilization" {
   statistic           = "Average"
   threshold           = "85"
   alarm_actions       = [data.aws_sns_topic.cloudwatch_alarm.arn]
-  alarm_description   = "최근 5분 동안 api service 평균 MemoryUtilization 85% 초과"
+  alarm_description   = "최근 5분 동안 pay-backend service 평균 MemoryUtilization 85% 초과"
   datapoints_to_alarm = 1
   dimensions = {
     ClusterName = aws_ecs_cluster.ridi_pay_backend.name
-    ServiceName = "api"
+    ServiceName = "pay-backend"
   }
 }
 
