@@ -173,36 +173,3 @@ resource "aws_security_group_rule" "allow_test_store" {
   cidr_blocks       = ["52.78.20.56/32"]
   security_group_id = aws_security_group.web.id
 }
-
-resource "aws_security_group_rule" "allow_staging_store" {
-  count             = module.global_variables.is_staging ? 1 : 0
-  type              = "ingress"
-  from_port         = 443
-  to_port           = 443
-  protocol          = "tcp"
-  cidr_blocks       = ["115.68.53.150/32"]
-  security_group_id = aws_security_group.web.id
-}
-
-resource "aws_security_group" "ssh_from_bastion" {
-  vpc_id = aws_vpc.vpc.id
-  name   = "ssh-from-bastion"
-  ingress {
-    from_port = 22
-    to_port   = 22
-    protocol  = "tcp"
-    security_groups = [
-      aws_security_group.bastion.id,
-    ]
-  }
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  tags = {
-    Name = "ssh-from-bastion-${module.global_variables.env}"
-  }
-}
-
