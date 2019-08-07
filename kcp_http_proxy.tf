@@ -52,32 +52,6 @@ resource "aws_lb_listener" "kcp_http_proxy" {
   }
 }
 
-# Service Discovery
-resource "aws_service_discovery_private_dns_namespace" "sd_private_dns_namespace" {
-  name = "${module.global_variables.env}.local"
-  description = "${module.global_variables.env}"
-  vpc = aws_vpc.vpc.id
-}
-
-resource "aws_service_discovery_service" "kcp_http_proxy" {
-  name = "kcp"
-  
-  dns_config {
-    namespace_id = aws_service_discovery_private_dns_namespace.sd_private_dns_namespace.id
-
-    dns_records {
-      ttl = 10
-      type = "A"
-    }
-
-    routing_policy = "MULTIVALUE"
-  }
-  
-  health_check_custom_config {
-    failure_threshold = 5
-  }
-}
-
 # CloudWatch
 resource "aws_cloudwatch_log_group" "kcp_http_proxy_logs" {
   name = "${module.global_variables.env}.kcp-http-proxy"
