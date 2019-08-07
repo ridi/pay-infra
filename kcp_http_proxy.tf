@@ -12,6 +12,46 @@ resource "aws_ecs_cluster" "kcp_http_proxy" {
   name = "kcp-http-proxy-${module.global_variables.env}"
 }
 
+resource "aws_lb" "kcp_http_proxy" {
+  name = "kcp-http-proxy-${module.global_variables.env}"
+  internal = true
+  load_balancer_type = "application"
+  security_groups = [aws_security_group.kcp_http_proxy.id]
+  subnets = [
+    aws_subnet.public_2a.id,
+    aws_subnet.public_2c.id,
+  ]
+
+  enable_deletion_protection = true
+
+  tags = {
+    Environment = module.global_variables.env
+  }
+}
+
+resource "aws_lb_target_group" "kcp_http_proxy" {
+  port = 80
+  protocol = "HTTP"
+  target_type = "ip"
+  vpc_id = aws_vpc.vpc.id
+  deregistration_delay = 60
+  depends_on = [aws_lb.kcp_http_proxy]
+  health_check {
+    path = "/health"
+    matcher = "200"
+  }
+}
+
+resource "aws_lb_listener" "kcp_http_proxy" {
+  load_balancer_arn = aws_lb.kcp_http_proxy.arn
+  port = 80
+  protocol = "HTTP"
+  default_action {
+    type = "forward"
+    target_group_arn = aws_lb_target_group.kcp_http_proxy.arn
+  }
+}
+
 # Service Discovery
 resource "aws_service_discovery_private_dns_namespace" "sd_private_dns_namespace" {
   name = "${module.global_variables.env}.local"
