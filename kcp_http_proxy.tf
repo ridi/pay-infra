@@ -18,8 +18,8 @@ resource "aws_lb" "kcp_http_proxy" {
   load_balancer_type = "application"
   security_groups = [aws_security_group.kcp_http_proxy.id]
   subnets = [
-    aws_subnet.public_2a.id,
-    aws_subnet.public_2c.id,
+    aws_subnet.private_2a.id,
+    aws_subnet.private_2c.id,
   ]
 
   enable_deletion_protection = true
