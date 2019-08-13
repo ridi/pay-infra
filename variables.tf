@@ -2,11 +2,19 @@ variable "region" {
   default = "ap-northeast-2"
 }
 
-variable "acm_certificate_domain" {
+variable "acm_certificate_domain_frontend" {
   default = {
     "prod"    = "pay.ridibooks.com"
     "staging" = "pay.ridibooks.com"
     "test"    = "pay.ridi.io"
+  }
+}
+
+variable "acm_certificate_domain_backend" {
+  default = {
+    "prod"    = "pay-api.ridibooks.com"
+    "staging" = "pay-api.ridibooks.com"
+    "test"    = "pay-api.dev.ridi.io"
   }
 }
 
