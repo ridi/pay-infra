@@ -5,7 +5,7 @@ resource "aws_db_instance" "master" {
   storage_type               = "gp2"
   engine                     = "mariadb"
   engine_version             = "10.3.8"
-  instance_class             = module.global_variables.is_prod ? "db.t2.medium" : "db.t2.micro"
+  instance_class             = module.global_variables.is_prod ? "db.t3.medium" : "db.t3.micro"
   name                       = "ridi_pay"
   username                   = "ridi"
   password                   = data.aws_kms_secrets.rds.plaintext["password"]
@@ -15,6 +15,7 @@ resource "aws_db_instance" "master" {
   vpc_security_group_ids     = [aws_security_group.rds.id]
   auto_minor_version_upgrade = false
   backup_retention_period    = 7
+  ca_cert_identifier         = "rds-ca-2019"
 }
 
 resource "aws_db_instance" "slave" {
@@ -25,7 +26,7 @@ resource "aws_db_instance" "slave" {
   storage_type               = "gp2"
   engine                     = "mariadb"
   engine_version             = "10.3.8"
-  instance_class             = module.global_variables.is_prod ? "db.t2.medium" : "db.t2.micro"
+  instance_class             = module.global_variables.is_prod ? "db.t3.medium" : "db.t3.micro"
   name                       = "ridi_pay"
   username                   = "ridi"
   password                   = data.aws_kms_secrets.rds.plaintext["password"]
@@ -33,6 +34,7 @@ resource "aws_db_instance" "slave" {
   vpc_security_group_ids     = [aws_security_group.rds.id]
   auto_minor_version_upgrade = false
   backup_retention_period    = 7
+  ca_cert_identifier         = "rds-ca-2019"
 }
 
 resource "aws_db_parameter_group" "master" {
