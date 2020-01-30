@@ -107,3 +107,22 @@ resource "aws_dynamodb_table" "kcp_payment_approval_requests" {
     Environment = module.global_variables.env
   }
 }
+
+resource "aws_cloudwatch_metric_alarm" "kcp_http_proxy_unhealthy_host_count" {
+  count               = module.global_variables.is_prod ? 1 : 0
+  alarm_name          = "kcp_http_proxy_unhealthy_host_count"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "1"
+  metric_name         = "UnHealthyHostCount"
+  namespace           = "AWS/ApplicationELB"
+  period              = "300"
+  statistic           = "Maximum"
+  threshold           = "1"
+  alarm_actions       = [data.aws_sns_topic.cloudwatch_alarm.arn]
+  alarm_description   = "ECS Task 1개 이상 Unhealthy"
+  datapoints_to_alarm = 1
+  dimensions = {
+    LoadBalancer = aws_lb.kcp_http_proxy.arn_suffix
+    TargetGroup = aws_lb_target_group.kcp_http_proxy.arn_suffix
+  }
+}
