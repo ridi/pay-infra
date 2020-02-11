@@ -8,7 +8,7 @@ resource "aws_db_instance" "master" {
   instance_class             = module.global_variables.is_prod ? "db.t3.medium" : "db.t3.micro"
   name                       = "ridi_pay"
   username                   = "ridi"
-  password                   = data.aws_kms_secrets.rds.plaintext["password"]
+  password                   = data.aws_kms_secrets.rds.plaintext["password_${module.global_variables.env}"]
   multi_az                   = module.global_variables.is_prod ? true : false
   parameter_group_name       = aws_db_parameter_group.master[0].name
   db_subnet_group_name       = aws_db_subnet_group.rds[0].name
@@ -29,7 +29,7 @@ resource "aws_db_instance" "slave" {
   instance_class             = module.global_variables.is_prod ? "db.t3.medium" : "db.t3.micro"
   name                       = "ridi_pay"
   username                   = "ridi"
-  password                   = data.aws_kms_secrets.rds.plaintext["password"]
+  password                   = data.aws_kms_secrets.rds.plaintext["password_${module.global_variables.env}"]
   parameter_group_name       = aws_db_parameter_group.slave[0].name
   vpc_security_group_ids     = [aws_security_group.rds.id]
   auto_minor_version_upgrade = false
