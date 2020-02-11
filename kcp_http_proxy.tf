@@ -10,6 +10,10 @@ resource "aws_ecr_repository" "kcp_http_proxy" {
 
 resource "aws_ecs_cluster" "kcp_http_proxy" {
   name = "kcp-http-proxy-${module.global_variables.env}"
+  setting {
+    name = "containerInsights"
+    value = module.global_variables.is_prod ? "enabled" : "disabled"
+  }
 }
 
 resource "aws_lb" "kcp_http_proxy" {
