@@ -110,7 +110,7 @@ resource "aws_dynamodb_table" "kcp_payment_approval_requests" {
 
 resource "aws_cloudwatch_metric_alarm" "kcp_http_proxy_unhealthy_host_count" {
   count               = module.global_variables.is_prod ? 1 : 0
-  alarm_name          = "kcp_http_proxy_unhealthy_host_count"
+  alarm_name          = "kcp-http-proxy-unhealthy-host-count"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = "1"
   metric_name         = "UnHealthyHostCount"

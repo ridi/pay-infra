@@ -12,7 +12,7 @@ data "aws_sns_topic" "cloudwatch_alarm" {
 
 resource "aws_cloudwatch_metric_alarm" "pay_backend_alb_5xx_error" {
   count               = module.global_variables.is_prod ? 1 : 0
-  alarm_name          = "pay_backend_alb_5xx_error"
+  alarm_name          = "pay-backend-alb-5xx-error"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = "1"
   metric_name         = "HTTPCode_ELB_5XX_Count"
