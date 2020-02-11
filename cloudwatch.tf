@@ -66,6 +66,25 @@ resource "aws_cloudwatch_metric_alarm" "pay_backend_memory_utilization" {
   }
 }
 
+resource "aws_cloudwatch_metric_alarm" "pay_backend_unhealthy_host_count" {
+  count               = module.global_variables.is_prod ? 1 : 0
+  alarm_name          = "pay-backend-unhealthy-host-count"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "1"
+  metric_name         = "UnHealthyHostCount"
+  namespace           = "AWS/ApplicationELB"
+  period              = "300"
+  statistic           = "Maximum"
+  threshold           = "1"
+  alarm_actions       = [data.aws_sns_topic.cloudwatch_alarm.arn]
+  alarm_description   = "ECS Task 1개 이상 Unhealthy"
+  datapoints_to_alarm = 1
+  dimensions = {
+    LoadBalancer = aws_alb.ridi_pay_backend_fargate.arn_suffix
+    TargetGroup = aws_alb_target_group.ridi_pay_backend_fargate.arn_suffix
+  }
+}
+
 resource "aws_cloudwatch_metric_alarm" "elasticache_001_cpu_utilization" {
   count               = module.global_variables.is_prod ? 1 : 0
   alarm_name          = "elasticache-001-cpu-utilization"
