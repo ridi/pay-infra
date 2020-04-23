@@ -10,7 +10,13 @@ resource "aws_s3_bucket_policy" "ridi_pay_frontend" {
 resource "aws_s3_bucket" "ridi_pay_backend_api_doc" {
   count  = module.global_variables.is_prod ? 1 : 0
   bucket = "ridi-pay-backend-api-doc"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
 }
+    }
+  }
 
 resource "aws_s3_bucket_policy" "ridi_pay_backend_api_doc" {
   count  = module.global_variables.is_prod ? 1 : 0
