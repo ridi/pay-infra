@@ -11,11 +11,13 @@ resource "aws_db_instance" "master" {
   password                   = data.aws_kms_secrets.rds.plaintext["password_${module.global_variables.env}"]
   multi_az                   = module.global_variables.is_prod ? true : false
   parameter_group_name       = aws_db_parameter_group.master[0].name
+  option_group_name          = aws_db_option_group.master[0].name
   db_subnet_group_name       = aws_db_subnet_group.rds[0].name
   vpc_security_group_ids     = [aws_security_group.rds.id]
   auto_minor_version_upgrade = false
   backup_retention_period    = 7
   ca_cert_identifier         = "rds-ca-2019"
+  apply_immediately          = true
 }
 
 resource "aws_db_instance" "slave" {
@@ -31,10 +33,12 @@ resource "aws_db_instance" "slave" {
   username                   = "ridi"
   password                   = data.aws_kms_secrets.rds.plaintext["password_${module.global_variables.env}"]
   parameter_group_name       = aws_db_parameter_group.slave[0].name
+  option_group_name          = aws_db_option_group.slave[0].name
   vpc_security_group_ids     = [aws_security_group.rds.id]
   auto_minor_version_upgrade = false
   backup_retention_period    = 7
   ca_cert_identifier         = "rds-ca-2019"
+  apply_immediately          = true
 }
 
 resource "aws_db_parameter_group" "master" {
@@ -86,6 +90,44 @@ resource "aws_db_parameter_group" "slave" {
   parameter {
     name  = "time_zone"
     value = "Asia/Seoul"
+  }
+}
+
+resource "aws_db_option_group" "master" {
+  name                 = "ridi-pay-${module.global_variables.env}-master:mariadb-10-3"
+  engine_name          = "MariaDB"
+  major_engine_version = "10.3"
+
+  option {
+    option_name = "MARIADB_AUDIT_PLUGIN"
+
+    option_settings {
+      name  = "SERVER_AUDIT_LOGGING"
+      value = "ON"
+    }
+    option_settings {
+      name  = "SERVER_AUDIT_EVENTS"
+      value = "CONNECT,QUERY,TABLE,QUERY_DDL,QUERY_DML,QUERY_DCL"
+    }
+  }
+}
+
+resource "aws_db_option_group" "slave" {
+  name                 = "ridi-pay-${module.global_variables.env}-slave:mariadb-10-3"
+  engine_name          = "MariaDB"
+  major_engine_version = "10.3"
+
+  option {
+    option_name = "MARIADB_AUDIT_PLUGIN"
+
+    option_settings {
+      name  = "SERVER_AUDIT_LOGGING"
+      value = "ON"
+    }
+    option_settings {
+      name  = "SERVER_AUDIT_EVENTS"
+      value = "CONNECT,QUERY,TABLE,QUERY_DDL,QUERY_DML,QUERY_DCL"
+    }
   }
 }
 
