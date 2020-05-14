@@ -118,7 +118,8 @@ resource "aws_db_parameter_group" "slave" {
 }
 
 resource "aws_db_option_group" "master" {
-  name                 = "ridi-pay-${module.global_variables.env}-master:mariadb-10-3"
+  count                = module.global_variables.is_staging ? 0 : 1
+  name                 = "ridi-pay-${module.global_variables.env}-master"
   engine_name          = "MariaDB"
   major_engine_version = "10.3"
 
@@ -137,7 +138,8 @@ resource "aws_db_option_group" "master" {
 }
 
 resource "aws_db_option_group" "slave" {
-  name                 = "ridi-pay-${module.global_variables.env}-slave:mariadb-10-3"
+  count                = module.global_variables.is_prod ? 1 : 0
+  name                 = "ridi-pay-${module.global_variables.env}-slave"
   engine_name          = "MariaDB"
   major_engine_version = "10.3"
 
