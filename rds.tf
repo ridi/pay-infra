@@ -127,10 +127,6 @@ resource "aws_db_option_group" "master" {
     option_name = "MARIADB_AUDIT_PLUGIN"
 
     option_settings {
-      name  = "SERVER_AUDIT_LOGGING"
-      value = "ON"
-    }
-    option_settings {
       name  = "SERVER_AUDIT_EVENTS"
       value = "CONNECT,QUERY,TABLE,QUERY_DDL,QUERY_DML,QUERY_DCL"
     }
@@ -146,10 +142,6 @@ resource "aws_db_option_group" "slave" {
   option {
     option_name = "MARIADB_AUDIT_PLUGIN"
 
-    option_settings {
-      name  = "SERVER_AUDIT_LOGGING"
-      value = "ON"
-    }
     option_settings {
       name  = "SERVER_AUDIT_EVENTS"
       value = "CONNECT,QUERY,TABLE,QUERY_DDL,QUERY_DML,QUERY_DCL"
