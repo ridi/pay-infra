@@ -11,11 +11,13 @@ resource "aws_db_instance" "master" {
   password                   = data.aws_kms_secrets.rds.plaintext["password_${module.global_variables.env}"]
   multi_az                   = module.global_variables.is_prod ? true : false
   parameter_group_name       = aws_db_parameter_group.master[0].name
+  option_group_name          = aws_db_option_group.master[0].name
   db_subnet_group_name       = aws_db_subnet_group.rds[0].name
   vpc_security_group_ids     = [aws_security_group.rds.id]
   auto_minor_version_upgrade = false
   backup_retention_period    = 7
   ca_cert_identifier         = "rds-ca-2019"
+  apply_immediately          = true
 }
 
 resource "aws_db_instance" "slave" {
@@ -31,16 +33,30 @@ resource "aws_db_instance" "slave" {
   username                   = "ridi"
   password                   = data.aws_kms_secrets.rds.plaintext["password_${module.global_variables.env}"]
   parameter_group_name       = aws_db_parameter_group.slave[0].name
+  option_group_name          = aws_db_option_group.slave[0].name
   vpc_security_group_ids     = [aws_security_group.rds.id]
   auto_minor_version_upgrade = false
   backup_retention_period    = 7
   ca_cert_identifier         = "rds-ca-2019"
+  apply_immediately          = true
 }
 
 resource "aws_db_parameter_group" "master" {
   count  = module.global_variables.is_staging ? 0 : 1
   name   = "ridi-pay-${module.global_variables.env}-master"
   family = "mariadb10.3"
+  parameter {
+    name  = "general_log"
+    value = "1"
+  }
+  parameter {
+    name  = "slow_query_log"
+    value = "1"
+  }
+  parameter {
+    name  = "long_query_time"
+    value = "1"
+  }
   parameter {
     name  = "read_only"
     value = "0"
@@ -68,6 +84,18 @@ resource "aws_db_parameter_group" "slave" {
   name   = "ridi-pay-${module.global_variables.env}-slave"
   family = "mariadb10.3"
   parameter {
+    name  = "general_log"
+    value = "1"
+  }
+  parameter {
+    name  = "slow_query_log"
+    value = "1"
+  }
+  parameter {
+    name  = "long_query_time"
+    value = "1"
+  }
+  parameter {
     name  = "read_only"
     value = "1"
   }
@@ -86,6 +114,38 @@ resource "aws_db_parameter_group" "slave" {
   parameter {
     name  = "time_zone"
     value = "Asia/Seoul"
+  }
+}
+
+resource "aws_db_option_group" "master" {
+  count                = module.global_variables.is_staging ? 0 : 1
+  name                 = "ridi-pay-${module.global_variables.env}-master"
+  engine_name          = "MariaDB"
+  major_engine_version = "10.3"
+
+  option {
+    option_name = "MARIADB_AUDIT_PLUGIN"
+
+    option_settings {
+      name  = "SERVER_AUDIT_EVENTS"
+      value = "CONNECT,QUERY,TABLE,QUERY_DDL,QUERY_DML,QUERY_DCL"
+    }
+  }
+}
+
+resource "aws_db_option_group" "slave" {
+  count                = module.global_variables.is_prod ? 1 : 0
+  name                 = "ridi-pay-${module.global_variables.env}-slave"
+  engine_name          = "MariaDB"
+  major_engine_version = "10.3"
+
+  option {
+    option_name = "MARIADB_AUDIT_PLUGIN"
+
+    option_settings {
+      name  = "SERVER_AUDIT_EVENTS"
+      value = "CONNECT,QUERY,TABLE,QUERY_DDL,QUERY_DML,QUERY_DCL"
+    }
   }
 }
 
