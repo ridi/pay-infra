@@ -22,3 +22,16 @@ data "aws_iam_policy_document" "ridi_pay_frontend" {
   }
 }
 
+resource "aws_iam_user" "hoseongson" {
+  name = "hoseong.son"
+}
+
+resource "aws_iam_user_policy_attachment" "hoseongson_readonly" {
+  user       = aws_iam_user.hoseongson.name
+  policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
+}
+
+resource "aws_iam_user_policy_attachment" "hoseongson_iam_change_password" {
+  user       = aws_iam_user.hoseongson.name
+  policy_arn = "arn:aws:iam::aws:policy/IAMUserChangePassword"
+}
