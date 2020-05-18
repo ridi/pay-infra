@@ -17,7 +17,6 @@ resource "aws_db_instance" "master" {
   auto_minor_version_upgrade = false
   backup_retention_period    = 7
   ca_cert_identifier         = "rds-ca-2019"
-  apply_immediately          = true
 }
 
 resource "aws_db_instance" "slave" {
@@ -38,7 +37,6 @@ resource "aws_db_instance" "slave" {
   auto_minor_version_upgrade = false
   backup_retention_period    = 7
   ca_cert_identifier         = "rds-ca-2019"
-  apply_immediately          = true
 }
 
 resource "aws_db_parameter_group" "master" {
@@ -120,7 +118,7 @@ resource "aws_db_parameter_group" "slave" {
 resource "aws_db_option_group" "master" {
   count                = module.global_variables.is_staging ? 0 : 1
   name                 = "ridi-pay-${module.global_variables.env}-master"
-  engine_name          = "MariaDB"
+  engine_name          = "mariadb"
   major_engine_version = "10.3"
 
   option {
@@ -136,7 +134,7 @@ resource "aws_db_option_group" "master" {
 resource "aws_db_option_group" "slave" {
   count                = module.global_variables.is_prod ? 1 : 0
   name                 = "ridi-pay-${module.global_variables.env}-slave"
-  engine_name          = "MariaDB"
+  engine_name          = "mariadb"
   major_engine_version = "10.3"
 
   option {
