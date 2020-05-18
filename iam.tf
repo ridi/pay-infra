@@ -22,3 +22,7 @@ data "aws_iam_policy_document" "ridi_pay_frontend" {
   }
 }
 
+resource "aws_iam_user" "hoseongson" {
+  name = "hoseong.son"
+}
+
