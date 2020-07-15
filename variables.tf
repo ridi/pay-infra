@@ -74,3 +74,23 @@ variable "frontend_cf_alias" {
   }
 }
 
+variable "office_cidr_blocks" {
+  default = [
+    "218.232.41.2/32",
+    "218.232.41.3/32",
+    "218.232.41.4/32",
+    "218.232.41.5/32",
+    "222.231.4.164/32",
+    "222.231.4.165/32",
+  ]
+}
+
+variable "bastion_internal_outbound_ports" {
+  default = [
+    22,
+    80,
+    443,
+    6379,
+    3306
+  ]
+}
