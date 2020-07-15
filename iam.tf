@@ -59,7 +59,7 @@ resource "aws_iam_group_policy" "developers_extra_policy" {
 
   policy = <<EOF
 {
-  "Version": "2020-07-01",
+  "Version": "2012-10-17",
   "Statement": [
     {
       "Action": [
