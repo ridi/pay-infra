@@ -12,6 +12,7 @@ resource "aws_instance" "bastion" {
   ]
   subnet_id                   = aws_subnet.public_2a.id
   associate_public_ip_address = true
+  iam_instance_profile        = aws_iam_instance_profile.bastion.name
   tags = {
     Name = "bastion-${module.global_variables.env}"
   }

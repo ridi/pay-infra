@@ -137,9 +137,9 @@ resource "aws_route" "private" {
 }
 
 resource "aws_vpc_endpoint" "ecr" {
-  vpc_id = aws_vpc.vpc.id
-  service_name = "com.amazonaws.ap-northeast-2.ecr.dkr"
-  vpc_endpoint_type = "Interface"
+  vpc_id              = aws_vpc.vpc.id
+  service_name        = "com.amazonaws.ap-northeast-2.ecr.dkr"
+  vpc_endpoint_type   = "Interface"
   private_dns_enabled = true
   subnet_ids = [
     aws_subnet.private_2a.id,
