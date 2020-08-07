@@ -1,3 +1,8 @@
+resource "aws_ecr_repository" "ridi_pay_backend_nginx" {
+  count = module.global_variables.is_prod ? 1 : 0
+  name  = "ridi/pay-backend-nginx"
+}
+
 resource "aws_ecr_repository" "ridi_pay_backend" {
   count = module.global_variables.is_prod ? 1 : 0
   name  = "ridi/pay-backend"
