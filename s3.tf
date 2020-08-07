@@ -46,7 +46,6 @@ POLICY
 
 resource "aws_s3_bucket" "ridi_pay_access_logs" {
   count  = module.global_variables.is_prod ? 1 : 0
-  region = "ap-northeast-2"
   bucket = "ridi-pay-access-logs"
   acl    = "log-delivery-write"
 }
