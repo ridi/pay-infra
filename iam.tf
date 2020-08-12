@@ -53,38 +53,43 @@ resource "aws_iam_role_policy_attachment" "bastion" {
 
 # users
 resource "aws_iam_user" "hoseongson" {
+  count = module.global_variables.is_prod ? 1 : 0
   name = "hoseong.son"
 }
 
 resource "aws_iam_user" "jaeyongkwack" {
+  count = module.global_variables.is_prod ? 1 : 0
   name = "jaeyongkwack"
 }
 
 # developers group
 resource "aws_iam_group" "developers" {
+  count = module.global_variables.is_prod ? 1 : 0
   name = "developers"
   path = "/users/"
 }
 
 resource "aws_iam_group_membership" "developers" {
+  count = module.global_variables.is_prod ? 1 : 0
   name = "developers"
-
   users = [
-    aws_iam_user.hoseongson.name,
-    aws_iam_user.jaeyongkwack.name
+    aws_iam_user.hoseongson[0].name,
+    aws_iam_user.jaeyongkwack[0].name
   ]
 
-  group = aws_iam_group.developers.name
+  group = aws_iam_group.developers[0].name
 }
 
 resource "aws_iam_group_policy_attachment" "developers_read_only_policy_attachment" {
-  group      = aws_iam_group.developers.name
+  count      = module.global_variables.is_prod ? 1 : 0
+  group      = aws_iam_group.developers[0].name
   policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
 }
 
 resource "aws_iam_group_policy" "developers_extra_policy" {
+  count = module.global_variables.is_prod ? 1 : 0
   name  = "developers-extra-policy"
-  group = aws_iam_group.developers.id
+  group = aws_iam_group.developers[0].id
 
   policy = <<EOF
 {
