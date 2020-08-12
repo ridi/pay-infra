@@ -43,7 +43,7 @@ resource "aws_cloudwatch_metric_alarm" "pay_backend_cpu_utilization" {
   datapoints_to_alarm = 1
   dimensions = {
     ClusterName = aws_ecs_cluster.ridi_pay_backend.name
-    ServiceName = "pay-backend"
+    ServiceName = "ridi-pay-backend"
   }
 }
 
@@ -62,7 +62,7 @@ resource "aws_cloudwatch_metric_alarm" "pay_backend_memory_utilization" {
   datapoints_to_alarm = 1
   dimensions = {
     ClusterName = aws_ecs_cluster.ridi_pay_backend.name
-    ServiceName = "pay-backend"
+    ServiceName = "ridi-pay-backend"
   }
 }
 
@@ -81,7 +81,7 @@ resource "aws_cloudwatch_metric_alarm" "pay_backend_unhealthy_host_count" {
   datapoints_to_alarm = 1
   dimensions = {
     LoadBalancer = aws_alb.ridi_pay_backend_fargate.arn_suffix
-    TargetGroup  = aws_alb_target_group.ridi_pay_backend_fargate.arn_suffix
+    TargetGroup  = aws_alb_target_group.ridi_pay_backend.arn_suffix
   }
 }
 

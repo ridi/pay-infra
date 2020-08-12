@@ -18,7 +18,7 @@ resource "aws_alb" "ridi_pay_backend_fargate" {
   }
 }
 
-resource "aws_alb_target_group" "ridi_pay_backend_fargate" {
+resource "aws_alb_target_group" "ridi_pay_backend" {
   port                 = 80
   protocol             = "HTTP"
   target_type          = "ip"
@@ -39,6 +39,6 @@ resource "aws_alb_listener" "ridi_pay_backend_fargate" {
   certificate_arn   = data.aws_acm_certificate.cert.arn
   default_action {
     type             = "forward"
-    target_group_arn = aws_alb_target_group.ridi_pay_backend_fargate.arn
+    target_group_arn = aws_alb_target_group.ridi_pay_backend.arn
   }
 }
