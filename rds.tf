@@ -75,6 +75,10 @@ resource "aws_db_parameter_group" "master" {
     name  = "time_zone"
     value = "Asia/Seoul"
   }
+  parameter {
+    name  = "log_output"
+    value = "file"
+  }
 }
 
 resource "aws_db_parameter_group" "slave" {
@@ -112,6 +116,10 @@ resource "aws_db_parameter_group" "slave" {
   parameter {
     name  = "time_zone"
     value = "Asia/Seoul"
+  }
+  parameter {
+    name  = "log_output"
+    value = "file"
   }
 }
 
